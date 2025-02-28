@@ -1,6 +1,7 @@
 package org.example.yolofarmbe.Entity;
 
 import jakarta.persistence.*;
+import org.example.yolofarmbe.Entity.Record;
 
 @Entity
 @Table(name = "amount_of_water_record")

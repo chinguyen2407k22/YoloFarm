@@ -23,7 +23,7 @@ public class UserAccount {
     @Column(name = "hash_password")
     private String hashPassword;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne()
     @JoinColumn(name = "farm_id")
     private Farm farm;
 

@@ -28,7 +28,7 @@ public class ActivityLog {
     @Column(name = "log_time")
     private Instant logTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "farm_id")
     private Farm farm;
 

@@ -16,7 +16,7 @@ public abstract class Record {
     @Column(name = "record_time")
     private Instant recordTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "farm_id")
     private Farm farm;
 

@@ -1,10 +1,14 @@
 package org.example.yolofarmbe.Entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.Nationalized;
 
 @Entity
 @Table(name = "user_account")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserAccount {
     @Id
     @Nationalized
@@ -26,6 +30,8 @@ public class UserAccount {
     @ManyToOne()
     @JoinColumn(name = "farm_id")
     private Farm farm;
+
+    private UserRole userRole;
 
     public String getUsername() {
         return username;

@@ -45,7 +45,7 @@ public class UserController {
             int id = userRequest.getFarm().getId();
             return ResponseEntity.badRequest()
                     .body(UserResponse.builder()
-                            .message("Farm with id " + id + "does not exist!")
+                            .message("Farm with id " + id + " does not exist!")
                             .userAccount(null)
                             .build());
         }

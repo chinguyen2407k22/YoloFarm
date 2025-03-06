@@ -18,8 +18,17 @@ public class ActivityLogController {
     private ActivityLogService activityLogService;
 
     @GetMapping
-    public List<ActivityLog> getAllActivityLog(){
+    public List<ActivityLog> getAllActivityLogs(){
         return activityLogService.getAllActivityLogs();
+    }
+
+    @GetMapping("/byfarm/{id}")
+    public List<ActivityLog> getActivitiyLogsOfAFarm(@PathVariable int id){
+        try {
+            return activityLogService.getAllActivityLogOfAFarm(id);
+        }catch (ResourceNotFoundException e){
+            return null;
+        }
     }
 
     @GetMapping("/{id}")

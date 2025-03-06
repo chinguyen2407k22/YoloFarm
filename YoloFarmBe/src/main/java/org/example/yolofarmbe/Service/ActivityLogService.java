@@ -23,6 +23,13 @@ public class ActivityLogService {
         return  activityLogRepository.findAll();
     }
 
+    public List<ActivityLog>getAllActivityLogOfAFarm(int farm_id){
+        Farm farm = farmRepository.findById(farm_id)
+                .orElseThrow(()->new ResourceNotFoundException("Farm with id " + farm_id + " doesn't exist!"));
+        int id = farm.getId();
+        return activityLogRepository.findByFarm_Id(farm_id);
+    }
+
     public ActivityLogResponse getAActivityLog(int id){
         ActivityLog activityLog = activityLogRepository.findById(id)
                 .orElseThrow(()->new ResourceNotFoundException("Activity Log with id "+id+" doesn't exits!"));

@@ -12,7 +12,7 @@ public class Reminder {
     private ReminderId id;
 
     @MapsId("username")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "username", nullable = false)
     private UserAccount username;
 

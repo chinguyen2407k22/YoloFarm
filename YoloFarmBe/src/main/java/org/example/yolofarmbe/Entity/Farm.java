@@ -15,8 +15,8 @@ public class Farm {
     private Double farmSize;
 
     @Nationalized
-    @Column(name = "farm_location")
-    private String farmLocation;
+    @Column(name = "crop")
+    private String crop;
 
     @Nationalized
     @Column(name = "farm_name", length = 100)
@@ -38,12 +38,12 @@ public class Farm {
         this.farmSize = farmSize;
     }
 
-    public String getFarmLocation() {
-        return farmLocation;
+    public String getCrop() {
+        return crop;
     }
 
-    public void setFarmLocation(String farmLocation) {
-        this.farmLocation = farmLocation;
+    public void setCrop(String crop) {
+        this.crop = crop;
     }
 
     public String getFarmName() {

@@ -16,6 +16,10 @@ public class UserAccount {
     private String username;
 
     @Nationalized
+    @Column(name = "email")
+    private String email;
+
+    @Nationalized
     @Column(name = "firstname", length = 50)
     private String firstname;
 
@@ -73,4 +77,11 @@ public class UserAccount {
         this.farm = farm;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

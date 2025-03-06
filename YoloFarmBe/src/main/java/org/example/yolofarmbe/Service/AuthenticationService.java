@@ -52,6 +52,7 @@ public class AuthenticationService {
                 .hashPassword((encodedPassword))
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
+                .email(request.getEmail())
                 .farm(farm)
                 .userRole(USER)
                 .build();

@@ -9,5 +9,6 @@ public class UserRequest {
     private String password;
     private String firstname;
     private String lastname;
+    private String email;
     private Farm farm;
 }

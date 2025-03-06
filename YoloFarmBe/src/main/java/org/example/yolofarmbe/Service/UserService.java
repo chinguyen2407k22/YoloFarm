@@ -41,6 +41,9 @@ public class UserService {
         if (request.getLastname() != null){
             userAccount.setLastname(request.getLastname());
         }
+        if (request.getEmail() != null){
+            userAccount.setEmail(request.getEmail());
+        }
         if (request.getFarm() != null){
             int id = request.getFarm().getId();
             Farm farm = farmRepository.findById(id)

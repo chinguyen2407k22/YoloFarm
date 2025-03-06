@@ -39,8 +39,8 @@ public class FarmService {
     public FarmResponse updateAFarm(int id, Farm farmifo){
         Farm farm = farmRepository.findById(id)
                 .orElseThrow(()->new ResourceNotFoundException("Farm with id " + id + " does not exist"));
-        if(farmifo.getFarmLocation() != null){
-            farm.setFarmLocation(farmifo.getFarmLocation());
+        if(farmifo.getCrop() != null){
+            farm.setCrop(farmifo.getCrop());
         }
         if(farmifo.getFarmSize() != null){
             farm.setFarmSize(farmifo.getFarmSize());

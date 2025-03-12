@@ -29,8 +29,8 @@ public class FarmController {
             return ResponseEntity.ok(farmResponse);
 
         }catch (ResourceNotFoundException e){
-            return ResponseEntity.ok(FarmResponse.builder()
-                    .message("Farm with id " + id + "does not exist")
+            return ResponseEntity.badRequest().body(FarmResponse.builder()
+                    .message(e.getMessage())
                     .farm(null)
                     .build());
         }
@@ -49,8 +49,8 @@ public class FarmController {
             return ResponseEntity.ok(farmResponse);
 
         }catch (ResourceNotFoundException e){
-            return ResponseEntity.ok(FarmResponse.builder()
-                    .message("Farm with id " + id + "does not exist")
+            return ResponseEntity.badRequest().body(FarmResponse.builder()
+                    .message(e.getMessage())
                     .farm(null)
                     .build());
         }
@@ -63,8 +63,8 @@ public class FarmController {
             return ResponseEntity.ok(farmResponse);
 
         }catch (ResourceNotFoundException e){
-            return ResponseEntity.ok(FarmResponse.builder()
-                    .message("Farm with id " + id + "does not exist")
+            return ResponseEntity.badRequest().body(FarmResponse.builder()
+                    .message(e.getMessage())
                     .farm(null)
                     .build());
         }

@@ -15,9 +15,24 @@ public class MonthlyTask extends Scheduler {
     @Column(name = "time")
     private LocalTime time;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "monthly_days", joinColumns = @JoinColumn(name = "id"))
     @Column(name = "days")
-    @Convert(converter = Jsr310JpaConverters.LocalTimeConverter.class)
     private List<LocalDate> dateList;
+
+    public LocalTime getTime() {
+        return time;
+    }
+
+    public void setTime(LocalTime time) {
+        this.time = time;
+    }
+
+    public List<LocalDate> getDateList() {
+        return dateList;
+    }
+
+    public void setDateList(List<LocalDate> dateList) {
+        this.dateList = dateList;
+    }
 }

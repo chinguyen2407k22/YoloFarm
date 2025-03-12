@@ -14,9 +14,25 @@ public class WeeklyTask extends Scheduler{
     @Column(name = "time")
     private LocalTime time;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "weekly_days", joinColumns = @JoinColumn(name = "id"))
+    @Enumerated(EnumType.STRING)
     @Column(name = "days")
-    @Convert(converter = Jsr310JpaConverters.LocalTimeConverter.class)
     private List<DayOfWeek> dateList;
+
+    public LocalTime getTime() {
+        return time;
+    }
+
+    public void setTime(LocalTime time) {
+        this.time = time;
+    }
+
+    public List<DayOfWeek> getDateList() {
+        return dateList;
+    }
+
+    public void setDateList(List<DayOfWeek> dateList) {
+        this.dateList = dateList;
+    }
 }

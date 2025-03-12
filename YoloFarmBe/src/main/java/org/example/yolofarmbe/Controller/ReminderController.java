@@ -3,7 +3,6 @@ package org.example.yolofarmbe.Controller;
 import org.example.yolofarmbe.Entity.Reminder;
 import org.example.yolofarmbe.Entity.ReminderId;
 import org.example.yolofarmbe.Exception.ResourceNotFoundException;
-import org.example.yolofarmbe.Request.ReminderRequest;
 import org.example.yolofarmbe.Response.ReminderResponse;
 import org.example.yolofarmbe.Service.ReminderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/reminders")
+@RequestMapping("/api/reminders")
 public class ReminderController {
     @Autowired
     private ReminderService reminderService;
@@ -23,14 +22,19 @@ public class ReminderController {
         return reminderService.getAllReminder();
     }
 
+    @GetMapping("/user/{username}")
+    public List<Reminder> getAReminderByUsername(@PathVariable String username ){
+        return reminderService.getAllReminderOfAUser(username);
+    }
+
     @GetMapping("/id")
     public ResponseEntity<ReminderResponse> getAReminder(@RequestBody ReminderId reminderId){
         try {
             ReminderResponse reminderResponse = reminderService.getAReminder(reminderId);
             return ResponseEntity.ok(reminderResponse);
         } catch (ResourceNotFoundException e){
-            return ResponseEntity.ok(ReminderResponse.builder()
-                    .message("Reminder with id " + reminderId.getId()+ " and username " +reminderId.getUsername()+ " doesn't exist!")
+            return ResponseEntity.badRequest().body(ReminderResponse.builder()
+                    .message(e.getMessage())
                     .reminder(null)
                     .build());
         }
@@ -42,13 +46,13 @@ public class ReminderController {
     }
 
     @PutMapping
-    public ResponseEntity<ReminderResponse> UpdateAReminder(@RequestBody ReminderRequest reminderRequest){
+    public ResponseEntity<ReminderResponse> UpdateAReminder(@RequestBody Reminder reminder){
         try {
-            ReminderResponse reminderResponse = reminderService.updateAReminder(reminderRequest.getReminderId(), reminderRequest.getReminder());
+            ReminderResponse reminderResponse = reminderService.updateAReminder(reminder.getId(), reminder);
             return ResponseEntity.ok(reminderResponse);
         } catch (ResourceNotFoundException e){
-            return ResponseEntity.ok(ReminderResponse.builder()
-                    .message("Reminder with id " + reminderRequest.getReminderId().getId()+ " and username " +reminderRequest.getReminderId().getUsername()+ " doesn't exist!")
+            return ResponseEntity.badRequest().body(ReminderResponse.builder()
+                    .message(e.getMessage())
                     .reminder(null)
                     .build());
         }
@@ -60,8 +64,8 @@ public class ReminderController {
             ReminderResponse reminderResponse = reminderService.deleteAReminder(reminderId);
             return ResponseEntity.ok(reminderResponse);
         } catch (ResourceNotFoundException e){
-            return ResponseEntity.ok(ReminderResponse.builder()
-                    .message("Reminder with id " + reminderId.getId()+ " and username " +reminderId.getUsername()+ " doesn't exist!")
+            return ResponseEntity.badRequest().body(ReminderResponse.builder()
+                    .message(e.getMessage())
                     .reminder(null)
                     .build());
         }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reminder")
@@ -26,7 +27,7 @@ public class Reminder {
     private String reminderDescription;
 
     @Column(name = "reminder_time")
-    private Instant reminderTime;
+    private LocalDateTime reminderTime;
 
     @Column(name = "is_done")
     private Boolean isDone;
@@ -63,11 +64,11 @@ public class Reminder {
         this.reminderDescription = reminderDescription;
     }
 
-    public Instant getReminderTime() {
+    public LocalDateTime getReminderTime() {
         return reminderTime;
     }
 
-    public void setReminderTime(Instant reminderTime) {
+    public void setReminderTime(LocalDateTime reminderTime) {
         this.reminderTime = reminderTime;
     }
 

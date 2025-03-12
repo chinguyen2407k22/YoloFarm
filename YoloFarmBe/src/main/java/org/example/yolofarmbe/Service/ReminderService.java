@@ -2,8 +2,11 @@ package org.example.yolofarmbe.Service;
 
 import org.example.yolofarmbe.Entity.Reminder;
 import org.example.yolofarmbe.Entity.ReminderId;
+import org.example.yolofarmbe.Entity.UserAccount;
 import org.example.yolofarmbe.Exception.ResourceNotFoundException;
+import org.example.yolofarmbe.Exception.UserNotFoundException;
 import org.example.yolofarmbe.Repository.ReminderRepository;
+import org.example.yolofarmbe.Repository.UserAccountRepository;
 import org.example.yolofarmbe.Response.ReminderResponse;
 import org.example.yolofarmbe.Response.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +19,15 @@ public class ReminderService {
     @Autowired
     private ReminderRepository reminderRepository;
 
+    @Autowired
+    private UserAccountRepository userAccountRepository;
+
     public List<Reminder> getAllReminder(){
         return reminderRepository.findAll();
+    }
+
+    public List<Reminder> getAllReminderOfAUser(String username){
+        return reminderRepository.findByUsername_Username(username);
     }
 
     public ReminderResponse getAReminder(ReminderId reminderId){
@@ -30,6 +40,10 @@ public class ReminderService {
     }
 
     public ReminderResponse addAReminder(Reminder reminder){
+        String username = reminder.getId().getUsername();
+        UserAccount userAccount = userAccountRepository.findByUsername(username)
+                        .orElseThrow(()->new UserNotFoundException());
+        reminder.setUsername(userAccount);
         reminderRepository.save(reminder);
         return ReminderResponse.builder()
                 .message("Add new reminder successful!")

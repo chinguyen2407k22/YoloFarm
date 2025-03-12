@@ -37,8 +37,8 @@ public class ActivityLogController {
             ActivityLogResponse activityLogResponse = activityLogService.getAActivityLog(id);
             return ResponseEntity.ok(activityLogResponse);
         }catch (ResourceNotFoundException e){
-            return  ResponseEntity.ok(ActivityLogResponse.builder()
-                    .message("Activity Log with id "+id+" doesn't exits!")
+            return  ResponseEntity.badRequest().body(ActivityLogResponse.builder()
+                    .message(e.getMessage())
                     .activityLog(null)
                     .build());
         }
@@ -57,8 +57,8 @@ public class ActivityLogController {
             ActivityLogResponse activityLogResponse = activityLogService.updateAActivityLog(id, activityLog);
             return ResponseEntity.ok(activityLogResponse);
         }catch (ResourceNotFoundException e){
-            return  ResponseEntity.ok(ActivityLogResponse.builder()
-                    .message("Activity Log or farm doesn't exits!")
+            return  ResponseEntity.badRequest().body(ActivityLogResponse.builder()
+                    .message(e.getMessage())
                     .activityLog(null)
                     .build());
         }
@@ -70,8 +70,8 @@ public class ActivityLogController {
             ActivityLogResponse activityLogResponse = activityLogService.deleteAActivityLog(id);
             return ResponseEntity.ok(activityLogResponse);
         }catch (ResourceNotFoundException e){
-            return  ResponseEntity.ok(ActivityLogResponse.builder()
-                    .message("Activity Log with id "+id+" doesn't exits!")
+            return  ResponseEntity.badRequest().body(ActivityLogResponse.builder()
+                    .message(e.getMessage())
                     .activityLog(null)
                     .build());
         }

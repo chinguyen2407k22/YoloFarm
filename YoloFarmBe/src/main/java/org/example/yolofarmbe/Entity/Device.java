@@ -25,9 +25,8 @@ public class Device {
     @Column(name="state")
     private State state;
 
-    @MapsId("id")
     @ManyToOne(optional = true)
-    @JoinColumn(name = "farm_id", nullable = false)
+    @JoinColumn(name = "farm_id",referencedColumnName = "id")
     private Farm farm;
 
     public Integer getId() {

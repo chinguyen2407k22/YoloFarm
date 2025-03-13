@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TemperatureSettingRepository < T extends TemperatureSetting> extends JpaRepository<T,Integer> {
+    T findByFarm_Id(int id);
 }

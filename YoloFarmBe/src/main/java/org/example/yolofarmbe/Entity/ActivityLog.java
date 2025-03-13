@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "activity_log")
@@ -26,7 +27,7 @@ public class ActivityLog {
     private String mode;
 
     @Column(name = "log_time")
-    private Instant logTime;
+    private LocalTime logTime;
 
     @ManyToOne()
     @JoinColumn(name = "farm_id")
@@ -64,11 +65,11 @@ public class ActivityLog {
         this.mode = mode;
     }
 
-    public Instant getLogTime() {
+    public LocalTime getLogTime() {
         return logTime;
     }
 
-    public void setLogTime(Instant logTime) {
+    public void setLogTime(LocalTime logTime) {
         this.logTime = logTime;
     }
 

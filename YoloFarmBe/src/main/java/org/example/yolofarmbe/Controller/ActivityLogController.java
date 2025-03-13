@@ -22,7 +22,7 @@ public class ActivityLogController {
         return activityLogService.getAllActivityLogs();
     }
 
-    @GetMapping("/byfarm/{id}")
+    @GetMapping("/farm/{id}")
     public List<ActivityLog> getActivitiyLogsOfAFarm(@PathVariable int id){
         try {
             return activityLogService.getAllActivityLogOfAFarm(id);

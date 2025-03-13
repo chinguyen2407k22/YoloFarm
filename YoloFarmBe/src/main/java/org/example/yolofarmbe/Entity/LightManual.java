@@ -7,5 +7,13 @@ import jakarta.persistence.*;
 public class LightManual extends LightSetting{
     @Column(name = "turn_on")
     @Enumerated(EnumType.STRING)
-    private State sendWarning;
+    private State turnOn;
+
+    public State getTurnOn() {
+        return turnOn;
+    }
+
+    public void setTurnOn(State turnOn) {
+        this.turnOn = turnOn;
+    }
 }

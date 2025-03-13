@@ -14,14 +14,26 @@ public abstract class Scheduler {
     private Integer id;
 
     @Column(name ="duration")
-    private Duration duration;
+    private long duration;
 
-    public Duration getDuration() {
+    @OneToOne
+    @JoinColumn(name = "light_setting_id", referencedColumnName = "id")
+    private LightScheduled lightScheduled;
+
+    @OneToOne
+    @JoinColumn(name = "temperature_setting_id", referencedColumnName = "id")
+    private TemperatureScheduled temperatureScheduled;
+
+    @OneToOne
+    @JoinColumn(name = "irrigationSetting_setting_id", referencedColumnName = "id")
+    private IrrigationScheduled irrigationScheduled;
+
+    public long getDuration() {
         return duration;
     }
 
     public void setDuration(long duration) {
-        this.duration = Duration.ofSeconds(duration);
+        this.duration = duration;
     }
 
     public Integer getId() {
@@ -30,5 +42,29 @@ public abstract class Scheduler {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public TemperatureScheduled getTemperatureScheduled() {
+        return temperatureScheduled;
+    }
+
+    public void setTemperatureScheduled(TemperatureScheduled temperatureScheduled) {
+        this.temperatureScheduled = temperatureScheduled;
+    }
+
+    public IrrigationScheduled getIrrigationScheduled() {
+        return irrigationScheduled;
+    }
+
+    public void setIrrigationScheduled(IrrigationScheduled irrigationScheduled) {
+        this.irrigationScheduled = irrigationScheduled;
+    }
+
+    public LightScheduled getLightScheduled() {
+        return lightScheduled;
+    }
+
+    public void setLightScheduled(LightScheduled lightScheduled) {
+        this.lightScheduled = lightScheduled;
     }
 }

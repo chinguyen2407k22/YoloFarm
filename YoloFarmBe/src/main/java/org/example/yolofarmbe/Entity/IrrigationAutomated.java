@@ -13,4 +13,19 @@ public class IrrigationAutomated extends IrrigationSetting{
     @Column(name = "danger_safe_behaviors")
     private String dangerSafeBehavior;
 
+    public String getMoistureLevel() {
+        return moistureLevel;
+    }
+
+    public void setMoistureLevel(String moistureLevel) {
+        this.moistureLevel = moistureLevel;
+    }
+
+    public String getDangerSafeBehavior() {
+        return dangerSafeBehavior;
+    }
+
+    public void setDangerSafeBehavior(String dangerSafeBehavior) {
+        this.dangerSafeBehavior = dangerSafeBehavior;
+    }
 }

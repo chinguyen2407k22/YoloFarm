@@ -9,7 +9,11 @@ public class LightScheduled extends LightSetting{
     @Enumerated(EnumType.STRING)
     private State sendWarning;
 
-    @OneToOne()
-    @JoinColumn(name = "scheduler_id",referencedColumnName = "id")
-    private Scheduler scheduler;
+    public State getSendWarning() {
+        return sendWarning;
+    }
+
+    public void setSendWarning(State sendWarning) {
+        this.sendWarning = sendWarning;
+    }
 }

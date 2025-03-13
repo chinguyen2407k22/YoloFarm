@@ -35,6 +35,15 @@ body:
 {
     duration: long
     time: hh:mm:ss
+    lightScheduled:{
+        id: int
+    }
+    temperatureScheduled: {
+        id: int
+    }
+    irrigationScheduled: {
+        id: int
+    }
 }
 Response format:
 {
@@ -50,6 +59,15 @@ body:
 {
     duration: long
     time: hh:mm:ss
+    lightScheduled:{
+        id: int
+    }
+    temperatureScheduled: {
+        id: int
+    }
+    irrigationScheduled: {
+        id: int
+    }
     dayOfWeeks: ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY","SUNDAY"]
 }
 Response format:
@@ -65,6 +83,15 @@ body:
 {
     duration: long
     time: hh:mm:ss
+    lightScheduled:{
+        id: int
+    }
+    temperatureScheduled: {
+        id: int
+    }
+    irrigationScheduled: {
+        id: int
+    }
     "days": ["yyyy-mm--dd"]
 }
 Response format:
@@ -81,6 +108,15 @@ body:
 {
     duration: long
     time: hh:mm:ss
+    lightScheduled:{
+        id: int
+    }
+    temperatureScheduled: {
+    id: int
+    }
+    irrigationScheduled: {
+    id: int
+    }
 }
 Response format:
 {
@@ -96,6 +132,15 @@ body:
 {
     duration: long
     time: hh:mm:ss
+    lightScheduled:{
+        id: int
+    }
+    temperatureScheduled: {
+        id: int
+    }
+    irrigationScheduled: {
+        id: int
+    }
     dayOfWeeks: ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY","SUNDAY"]
 }
 Response format:
@@ -111,6 +156,15 @@ body:
 {
     duration: long
     time: hh:mm:ss
+    lightScheduled:{
+        id: int
+    }
+    temperatureScheduled: {
+        id: int
+    }
+    irrigationScheduled: {
+        id: int
+    }
     "days": ["yyyy-mm--dd"]
 }
 Response format:

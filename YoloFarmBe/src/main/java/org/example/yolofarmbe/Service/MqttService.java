@@ -27,7 +27,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class MqttService {
 
-   private final String BROKER_URL = "tcp://io.adafruit.com:1883"; // Adafruit MQTT broker
+   private final String BROKER_URL = "tcp://io.adafruit.com:1883";
    private final String USERNAME = "phuctrangeo1709";
    private final String AIO_KEY = "aio_voqw706gj4OynKPHPnLKY7bz5Lqh";
 
@@ -117,21 +117,21 @@ public class MqttService {
          }
          System.out.println("\n----------------------------------------------------------------------");
 
-         Random random = new Random();
-         int x = random.nextInt(10);
-         publishMessage(FEED_TEMPERATURE, String.valueOf(random.nextInt(60)));
-         publishMessage(FEED_MOISTURE, String.valueOf(random.nextInt(60)));
-         publishMessage(FEED_HUMIDITY, String.valueOf(random.nextInt(60)));
-         publishMessage(FEED_AMOUNTOFWATER, String.valueOf(random.nextDouble(1)));
-         if (x % 2 == 0) {
-            publishMessage(FEED_ATOGGLE, "AW-0");
-            publishMessage(FEED_MTOGGLE, "MW-0");
-            x++;
-         } else {
-            publishMessage(FEED_ATOGGLE, "AW-1");
-            publishMessage(FEED_MTOGGLE, "MW-1");
-            x++;
-         }
+         // Random random = new Random();
+         // int x = random.nextInt(10);
+         // publishMessage(FEED_TEMPERATURE, String.valueOf(random.nextInt(60)));
+         // publishMessage(FEED_MOISTURE, String.valueOf(random.nextInt(60)));
+         // publishMessage(FEED_HUMIDITY, String.valueOf(random.nextInt(60)));
+         // publishMessage(FEED_AMOUNTOFWATER, String.valueOf(random.nextDouble(1)));
+         // if (x % 2 == 0) {
+         // publishMessage(FEED_ATOGGLE, "AW-0");
+         // publishMessage(FEED_MTOGGLE, "MW-0");
+         // x++;
+         // } else {
+         // publishMessage(FEED_ATOGGLE, "AW-1");
+         // publishMessage(FEED_MTOGGLE, "MW-1");
+         // x++;
+         // }
 
       } catch (Exception e) {
          e.printStackTrace();

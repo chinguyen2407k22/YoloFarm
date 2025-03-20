@@ -15,5 +15,4 @@ public class HumidityRecord extends Record {
     public void setRecordValue(Double recordValue) {
         this.recordValue = recordValue;
     }
-
 }

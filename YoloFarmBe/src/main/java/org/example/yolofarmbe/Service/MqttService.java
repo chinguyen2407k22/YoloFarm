@@ -5,17 +5,18 @@ import org.springframework.http.HttpHeaders;
 import java.util.Arrays;
 
 import org.eclipse.paho.client.mqttv3.*;
+import org.example.yolofarmbe.Entity.AmountOfWaterRecord;
 import org.example.yolofarmbe.Entity.HumidityRecord;
+import org.example.yolofarmbe.Entity.LightRecord;
 import org.example.yolofarmbe.Entity.MoistureRecord;
 import org.example.yolofarmbe.Entity.TemperatureRecord;
 import org.example.yolofarmbe.Response.AdafruitResponse;
-import org.example.yolofarmbe.Response.TemperatureResponse;
 
 import java.util.List;
-
-import javax.print.DocFlavor.STRING;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +30,12 @@ public class MqttService {
    private final String BROKER_URL = "tcp://io.adafruit.com:1883"; // Adafruit MQTT broker
    private final String USERNAME = "phuctrangeo1709";
    private final String AIO_KEY = "aio_voqw706gj4OynKPHPnLKY7bz5Lqh";
+
    private final String FEED_TEMPERATURE = "temperature";
    private final String FEED_MOISTURE = "moisture";
    private final String FEED_HUMIDITY = "humidity";
+   private final String FEED_LIGHT = "light";
+   private final String FEED_AMOUNTOFWATER = "amountwater";
    private final String FEED_ATOGGLE = "a-toggle";
    private final String FEED_MTOGGLE = "m-toggle";
 
@@ -39,13 +43,7 @@ public class MqttService {
 
    private RecordService recordService;
 
-   private final RestTemplate restTemplate = new RestTemplate();
-
-   private final TemperatureRecord temperatureRecord = new TemperatureRecord();
-
-   private final HumidityRecord humidityRecord = new HumidityRecord();
-
-   private final MoistureRecord moistureRecord = new MoistureRecord();
+   private RestTemplate restTemplate = new RestTemplate();
 
    @Autowired
    public MqttService(RecordService recordService) {
@@ -57,17 +55,14 @@ public class MqttService {
          options.setPassword(AIO_KEY.toCharArray());
          client.connect(options);
 
-         // Đăng ký lắng nghe dữ liệu từ feed
-         client.subscribe(USERNAME + "/feeds/+", (topic, msg) -> {
-            System.out.println("Received from " + topic + ": " + new String(msg.getPayload()));
-         });
+         client.subscribe(USERNAME + "/feeds/+");
 
       } catch (MqttException e) {
          e.printStackTrace();
       }
    }
 
-   @Scheduled(fixedRate = 3000) // Gọi API mỗi 5 giây
+   @Scheduled(fixedRate = 30 * 1000) // Gọi API mỗi 5 giây
    public void fetchDataFromAdafruit() {
       try {
          HttpHeaders headers = new HttpHeaders();
@@ -75,27 +70,68 @@ public class MqttService {
 
          HttpEntity<String> entity = new HttpEntity<>(headers);
 
-         List<String> feeds = Arrays.asList(FEED_TEMPERATURE, FEED_MOISTURE, FEED_HUMIDITY, FEED_ATOGGLE, FEED_MTOGGLE);
+         List<String> feeds = Arrays.asList(FEED_TEMPERATURE, FEED_MOISTURE, FEED_HUMIDITY, FEED_ATOGGLE, FEED_MTOGGLE,
+               FEED_AMOUNTOFWATER);
 
          for (String feed : feeds) {
-            String URL = "https://io.adafruit.com/api/v2/" + USERNAME + "/feeds/" + feed + "/data/last";
-            ResponseEntity<AdafruitResponse> response = restTemplate.exchange(URL, HttpMethod.GET, entity,
-                  AdafruitResponse.class);
 
-            if (feed.equals(FEED_TEMPERATURE)) {
-               temperatureRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
-               recordService.SaveRecords(feed, temperatureRecord);
-            } else if (feed.equals(FEED_MOISTURE)) {
-               moistureRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
-               recordService.SaveRecords(feed, moistureRecord);
-            } else if (feed.equals(FEED_HUMIDITY)) {
-               humidityRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
-               recordService.SaveRecords(feed, humidityRecord);
+            if (feed.equals(FEED_AMOUNTOFWATER)) {
+               String URL = "https://io.adafruit.com/api/v2/" + USERNAME + "/feeds/" + feed
+                     + "/data?limit=1";
+               ResponseEntity<List<AdafruitResponse>> response = restTemplate.exchange(URL, HttpMethod.GET, entity,
+                     new ParameterizedTypeReference<List<AdafruitResponse>>() {
+                     });
+               AmountOfWaterRecord amountofwaterRecord = new AmountOfWaterRecord();
+               amountofwaterRecord.setRecordValue(Double.parseDouble(response.getBody().get(0).getValue()));
+               recordService.SaveRecords(feed, amountofwaterRecord);
+
+               System.out.println("Fetched data from " + feed + ": " +
+                     response.getBody().get(0).getValue());
+            } else {
+               String URL = "https://io.adafruit.com/api/v2/" + USERNAME + "/feeds/" + feed
+                     + "/data/last";
+               ResponseEntity<AdafruitResponse> response = restTemplate.exchange(URL, HttpMethod.GET, entity,
+                     AdafruitResponse.class);
+
+               if (feed.equals(FEED_TEMPERATURE)) {
+                  TemperatureRecord temperatureRecord = new TemperatureRecord();
+                  temperatureRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
+                  recordService.SaveRecords(feed, temperatureRecord);
+               } else if (feed.equals(FEED_MOISTURE)) {
+                  MoistureRecord moistureRecord = new MoistureRecord();
+                  moistureRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
+                  recordService.SaveRecords(feed, moistureRecord);
+               } else if (feed.equals(FEED_HUMIDITY)) {
+                  HumidityRecord humidityRecord = new HumidityRecord();
+                  humidityRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
+                  recordService.SaveRecords(feed, humidityRecord);
+               } else if (feed.equals(FEED_LIGHT)) {
+                  LightRecord lightRecord = new LightRecord();
+                  lightRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
+                  recordService.SaveRecords(feed, lightRecord);
+               }
+
+               System.out.println("Fetched data from " + feed + ": " +
+                     response.getBody().getValue());
             }
-
-            System.out.println("Fetched data from " + feed + ": " + response.getBody().getValue());
          }
          System.out.println("\n----------------------------------------------------------------------");
+
+         Random random = new Random();
+         int x = random.nextInt(10);
+         publishMessage(FEED_TEMPERATURE, String.valueOf(random.nextInt(60)));
+         publishMessage(FEED_MOISTURE, String.valueOf(random.nextInt(60)));
+         publishMessage(FEED_HUMIDITY, String.valueOf(random.nextInt(60)));
+         publishMessage(FEED_AMOUNTOFWATER, String.valueOf(random.nextDouble(1)));
+         if (x % 2 == 0) {
+            publishMessage(FEED_ATOGGLE, "AW-0");
+            publishMessage(FEED_MTOGGLE, "MW-0");
+            x++;
+         } else {
+            publishMessage(FEED_ATOGGLE, "AW-1");
+            publishMessage(FEED_MTOGGLE, "MW-1");
+            x++;
+         }
 
       } catch (Exception e) {
          e.printStackTrace();

@@ -2,14 +2,20 @@ package org.example.yolofarmbe.Service;
 
 import org.springframework.http.HttpHeaders;
 
+import java.time.Instant;
 import java.util.Arrays;
 
 import org.eclipse.paho.client.mqttv3.*;
 import org.example.yolofarmbe.Entity.AmountOfWaterRecord;
+import org.example.yolofarmbe.Entity.Farm;
+import org.example.yolofarmbe.Entity.Record;
 import org.example.yolofarmbe.Entity.HumidityRecord;
 import org.example.yolofarmbe.Entity.LightRecord;
 import org.example.yolofarmbe.Entity.MoistureRecord;
 import org.example.yolofarmbe.Entity.TemperatureRecord;
+import org.example.yolofarmbe.Exception.ResourceNotFoundException;
+import org.example.yolofarmbe.Repository.FarmRepository;
+import org.example.yolofarmbe.Repository.RecordRepository;
 import org.example.yolofarmbe.Response.AdafruitResponse;
 
 import java.util.List;
@@ -45,10 +51,13 @@ public class MqttService {
 
    private RestTemplate restTemplate = new RestTemplate();
 
+   private FarmRepository farmRepository;
+
    @Autowired
-   public MqttService(RecordService recordService) {
+   public MqttService(RecordService recordService, FarmRepository farmRepository) {
       try {
          this.recordService = recordService;
+         this.farmRepository = farmRepository;
          client = new MqttClient(BROKER_URL, MqttClient.generateClientId());
          MqttConnectOptions options = new MqttConnectOptions();
          options.setUserName(USERNAME);
@@ -78,11 +87,20 @@ public class MqttService {
             if (feed.equals(FEED_AMOUNTOFWATER)) {
                String URL = "https://io.adafruit.com/api/v2/" + USERNAME + "/feeds/" + feed
                      + "/data?limit=1";
-               ResponseEntity<List<AdafruitResponse>> response = restTemplate.exchange(URL, HttpMethod.GET, entity,
+               ResponseEntity<List<AdafruitResponse>> response = restTemplate.exchange(URL,
+                     HttpMethod.GET, entity,
                      new ParameterizedTypeReference<List<AdafruitResponse>>() {
                      });
+
+               Integer farm_id = 1;
+               Farm farm = farmRepository.findById(farm_id)
+                     .orElseThrow(() -> new ResourceNotFoundException("Farm with id " + farm_id +
+                           "not exist"));
+
                AmountOfWaterRecord amountofwaterRecord = new AmountOfWaterRecord();
                amountofwaterRecord.setRecordValue(Double.parseDouble(response.getBody().get(0).getValue()));
+               amountofwaterRecord.setRecordTime(Instant.now());
+               amountofwaterRecord.setFarm(farm);
                recordService.SaveRecords(feed, amountofwaterRecord);
 
                System.out.println("Fetched data from " + feed + ": " +
@@ -90,24 +108,38 @@ public class MqttService {
             } else {
                String URL = "https://io.adafruit.com/api/v2/" + USERNAME + "/feeds/" + feed
                      + "/data/last";
-               ResponseEntity<AdafruitResponse> response = restTemplate.exchange(URL, HttpMethod.GET, entity,
+               ResponseEntity<AdafruitResponse> response = restTemplate.exchange(URL,
+                     HttpMethod.GET, entity,
                      AdafruitResponse.class);
+
+               Integer farm_id = 1;
+               Farm farm = farmRepository.findById(farm_id)
+                     .orElseThrow(() -> new ResourceNotFoundException("Farm with id " + farm_id +
+                           "not exist"));
 
                if (feed.equals(FEED_TEMPERATURE)) {
                   TemperatureRecord temperatureRecord = new TemperatureRecord();
                   temperatureRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
+                  temperatureRecord.setRecordTime(Instant.now());
+                  temperatureRecord.setFarm(farm);
                   recordService.SaveRecords(feed, temperatureRecord);
                } else if (feed.equals(FEED_MOISTURE)) {
                   MoistureRecord moistureRecord = new MoistureRecord();
                   moistureRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
+                  moistureRecord.setRecordTime(Instant.now());
+                  moistureRecord.setFarm(farm);
                   recordService.SaveRecords(feed, moistureRecord);
                } else if (feed.equals(FEED_HUMIDITY)) {
                   HumidityRecord humidityRecord = new HumidityRecord();
                   humidityRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
+                  humidityRecord.setRecordTime(Instant.now());
+                  humidityRecord.setFarm(farm);
                   recordService.SaveRecords(feed, humidityRecord);
                } else if (feed.equals(FEED_LIGHT)) {
                   LightRecord lightRecord = new LightRecord();
                   lightRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
+                  lightRecord.setRecordTime(Instant.now());
+                  lightRecord.setFarm(farm);
                   recordService.SaveRecords(feed, lightRecord);
                }
 
@@ -132,6 +164,13 @@ public class MqttService {
          // publishMessage(FEED_MTOGGLE, "MW-1");
          // x++;
          // }
+
+         // Farm farm = new Farm();
+         // farm.setCrop("tonton");
+         // farm.setFarmName("tonton");
+         // farm.setFarmSize(100.0);
+         // farm.setId(1);
+         // farmService.addNewFarm(farm);
 
       } catch (Exception e) {
          e.printStackTrace();

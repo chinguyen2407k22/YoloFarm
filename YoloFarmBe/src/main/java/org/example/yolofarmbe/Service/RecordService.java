@@ -8,12 +8,14 @@ import org.example.yolofarmbe.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class RecordService {
     @Autowired
     private RecordRepositoryFactory recordRepositoryFactory;
+    private RecordRepository recordRepository;
 
     @Autowired
     private FarmRepository farmRepository;
@@ -62,6 +64,35 @@ public class RecordService {
             default:
                 throw new IllegalArgumentException("Invalid record type: " + recordType);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void addRecord(double value, int farmId, String recordType) {
+        Farm farm = farmRepository.findById(farmId)
+                .orElseThrow(() -> new ResourceNotFoundException("Farm with id " + farmId + " not found"));
+        Record record = new Record() {};
+        record.setFarm(farm);
+        recordRepository.save(record);
+        switch (recordType.toLowerCase()) {
+            case "amountofwater":
+                AmountOfWaterRecordRepository amoWaterRepo = recordRepositoryFactory.getRecordRepository(AmountOfWaterRecordRepository.class);
+            case "moisture":
+                MoistureRecordRepository moiRepo = recordRepositoryFactory.getRecordRepository(MoistureRecordRepository.class);
+            case "light":
+                LightRecordRepository lightRepo = recordRepositoryFactory.getRecordRepository(LightRecordRepository.class);
+            case "humidity":
+                HumidityRecordRepository humiRepo = recordRepositoryFactory.getRecordRepository((HumidityRecordRepository.class));
+            case "temperature":
+                TemperatureRecord temRecord = new TemperatureRecord();
+                TemperatureRecordRepository temRepo = recordRepositoryFactory.getRecordRepository(TemperatureRecordRepository.class);
+                temRecord.setId(record.getId());
+                temRecord.setRecordValue(value);
+                temRepo.save(temRecord);
+            default:
+                throw new IllegalArgumentException("Invalid record type: " + recordType);
+        }
+
+
     }
 
     public String deleteRecord(String recordType, int record_id) {

@@ -98,6 +98,7 @@ public class RecordService {
                 HumidityRecordRepository humiRepo = recordRepositoryFactory
                         .getRecordRepository((HumidityRecordRepository.class));
                 humiRepo.save((HumidityRecord) record);
+
                 break;
             case "temperature":
                 TemperatureRecordRepository temRepo = recordRepositoryFactory

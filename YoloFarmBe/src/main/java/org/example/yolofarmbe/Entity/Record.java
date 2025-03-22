@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "record")

@@ -26,28 +26,35 @@ public class LightSettingService {
     @Autowired
     private SchedulerService schedulerService;
 
-    public List<? extends LightSetting> getAllLightSetting(String mode){
-        switch (mode.toLowerCase()){
+    @Autowired
+    private MqttService mqttService;
+
+    public List<? extends LightSetting> getAllLightSetting(String mode) {
+        switch (mode.toLowerCase()) {
             case "automated":
-                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory.getLightSettingRepository(LightAutomatedRepository.class);
+                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory
+                        .getLightSettingRepository(LightAutomatedRepository.class);
                 return lightAutomatedRepository.findAll();
             case "manual":
-                LightManualRepository lightManualRepository = lightSettingFactory.getLightSettingRepository(LightManualRepository.class);
+                LightManualRepository lightManualRepository = lightSettingFactory
+                        .getLightSettingRepository(LightManualRepository.class);
                 return lightManualRepository.findAll();
             case "scheduled":
-                LightScheduledRepository lightScheduledRepository = lightSettingFactory.getLightSettingRepository(LightScheduledRepository.class);
+                LightScheduledRepository lightScheduledRepository = lightSettingFactory
+                        .getLightSettingRepository(LightScheduledRepository.class);
                 return lightScheduledRepository.findAll();
             default:
                 throw new IllegalArgumentException("Invalid light setting mode: " + mode);
         }
     }
 
-    public LightSettingResponse<? extends LightSetting> getAllLightSettingFarm(String mode, int farm_id){
+    public LightSettingResponse<? extends LightSetting> getAllLightSettingFarm(String mode, int farm_id) {
         Farm farm = farmRepository.findById(farm_id)
-                .orElseThrow(()->new ResourceNotFoundException("Light Setting with "+farm_id+"doesn't exist!"));
-        switch (mode.toLowerCase()){
+                .orElseThrow(() -> new ResourceNotFoundException("Light Setting with " + farm_id + "doesn't exist!"));
+        switch (mode.toLowerCase()) {
             case "automated":
-                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory.getLightSettingRepository(LightAutomatedRepository.class);
+                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory
+                        .getLightSettingRepository(LightAutomatedRepository.class);
                 LightAutomated lightAutomated = lightAutomatedRepository.findByFarm_Id(farm_id);
                 return LightSettingResponse.builder()
                         .lightSetting(lightAutomated)
@@ -55,7 +62,8 @@ public class LightSettingService {
                         .mode(mode)
                         .build();
             case "manual":
-                LightManualRepository lightManualRepository = lightSettingFactory.getLightSettingRepository(LightManualRepository.class);
+                LightManualRepository lightManualRepository = lightSettingFactory
+                        .getLightSettingRepository(LightManualRepository.class);
                 LightManual lightManual = lightManualRepository.findByFarm_Id(farm_id);
                 return LightSettingResponse.builder()
                         .lightSetting(lightManual)
@@ -63,8 +71,9 @@ public class LightSettingService {
                         .mode(mode)
                         .build();
             case "scheduled":
-                LightScheduledRepository lightScheduledRepository = lightSettingFactory.getLightSettingRepository(LightScheduledRepository.class);
-                LightScheduled lightScheduled= lightScheduledRepository.findByFarm_Id(farm_id);
+                LightScheduledRepository lightScheduledRepository = lightSettingFactory
+                        .getLightSettingRepository(LightScheduledRepository.class);
+                LightScheduled lightScheduled = lightScheduledRepository.findByFarm_Id(farm_id);
                 return LightSettingResponse.builder()
                         .lightSetting(lightScheduled)
                         .message("Get light setting successfully!")
@@ -75,30 +84,36 @@ public class LightSettingService {
         }
     }
 
-    public LightSettingResponse<? extends LightSetting> getLightSettingById(String mode, int id){
+    public LightSettingResponse<? extends LightSetting> getLightSettingById(String mode, int id) {
         switch (mode.toLowerCase()) {
             case "automated":
-                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory.getLightSettingRepository(LightAutomatedRepository.class);
+                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory
+                        .getLightSettingRepository(LightAutomatedRepository.class);
                 LightAutomated lightAutomated = lightAutomatedRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
                 return LightSettingResponse.builder()
                         .lightSetting(lightAutomated)
                         .message("Get light setting successfully!")
                         .mode(mode)
                         .build();
             case "manual":
-                LightManualRepository lightManualRepository = lightSettingFactory.getLightSettingRepository(LightManualRepository.class);
+                LightManualRepository lightManualRepository = lightSettingFactory
+                        .getLightSettingRepository(LightManualRepository.class);
                 LightManual lightManual = lightManualRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
                 return LightSettingResponse.builder()
                         .lightSetting(lightManual)
                         .message("Get light setting successfully!")
                         .mode(mode)
                         .build();
             case "scheduled":
-                LightScheduledRepository lightScheduledRepository = lightSettingFactory.getLightSettingRepository(LightScheduledRepository.class);
+                LightScheduledRepository lightScheduledRepository = lightSettingFactory
+                        .getLightSettingRepository(LightScheduledRepository.class);
                 LightScheduled lightScheduled = lightScheduledRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
                 return LightSettingResponse.builder()
                         .lightSetting(lightScheduled)
                         .message("Get light setting successfully!")
@@ -109,30 +124,33 @@ public class LightSettingService {
         }
     }
 
-    public LightSettingResponse<? extends LightSetting> addALightSetting(LightSettingRequest lightSettingRequest, String mode){
-        switch (mode.toLowerCase()){
+    public LightSettingResponse<? extends LightSetting> addALightSetting(LightSettingRequest lightSettingRequest,
+            String mode) {
+        switch (mode.toLowerCase()) {
             case "automated":
-                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory.getLightSettingRepository(LightAutomatedRepository.class);
+                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory
+                        .getLightSettingRepository(LightAutomatedRepository.class);
                 LightAutomated lightAutomated = new LightAutomated();
-                if(lightSettingRequest.getFarm()!=null){
+                if (lightSettingRequest.getFarm() != null) {
                     int farm_id = lightSettingRequest.getFarm().getId();
                     Farm farm = farmRepository.findById(farm_id)
-                            .orElseThrow(()->new ResourceNotFoundException("Light Setting with "+farm_id+"doesn't exist!"));
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Light Setting with " + farm_id + "doesn't exist!"));
                     lightAutomated.setFarm(farm);
                 }
-                if(lightSettingRequest.getLower()>=0){
+                if (lightSettingRequest.getLower() >= 0) {
                     lightAutomated.setLower(lightSettingRequest.getLower());
                 }
-                if(lightSettingRequest.getMin()>=0) {
+                if (lightSettingRequest.getMin() >= 0) {
                     lightAutomated.setMin(lightSettingRequest.getMin());
                 }
-                if(lightSettingRequest.getUpper()>=0){
+                if (lightSettingRequest.getUpper() >= 0) {
                     lightAutomated.setUpper(lightSettingRequest.getUpper());
                 }
-                if(lightSettingRequest.getMax()>=0){
+                if (lightSettingRequest.getMax() >= 0) {
                     lightAutomated.setMax(lightSettingRequest.getMax());
                 }
-                if(lightSettingRequest.getSendWarning()!=null) {
+                if (lightSettingRequest.getSendWarning() != null) {
                     lightAutomated.setSendWarning(lightSettingRequest.getSendWarning());
                 }
                 lightAutomatedRepository.save(lightAutomated);
@@ -142,16 +160,24 @@ public class LightSettingService {
                         .lightSetting(lightAutomated)
                         .build();
             case "manual":
-                LightManualRepository lightManualRepository = lightSettingFactory.getLightSettingRepository(LightManualRepository.class);
+                LightManualRepository lightManualRepository = lightSettingFactory
+                        .getLightSettingRepository(LightManualRepository.class);
                 LightManual lightManual = new LightManual();
-                if(lightSettingRequest.getFarm()!=null){
+                if (lightSettingRequest.getFarm() != null) {
                     int farm_id = lightSettingRequest.getFarm().getId();
                     Farm farm = farmRepository.findById(farm_id)
-                            .orElseThrow(()->new ResourceNotFoundException("Light Setting with "+farm_id+"doesn't exist!"));
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Light Setting with " + farm_id + "doesn't exist!"));
                     lightManual.setFarm(farm);
                 }
-                if(lightSettingRequest.getTurnOn()!=null){
+                if (lightSettingRequest.getTurnOn() != null) {
                     lightManual.setTurnOn(lightSettingRequest.getTurnOn());
+                    if (lightSettingRequest.getTurnOn() == State.ON) {
+                        mqttService.publishMessage("water", "1");
+                    } else {
+                        mqttService.publishMessage("water", "0");
+
+                    }
                 }
                 lightManualRepository.save(lightManual);
                 return LightSettingResponse.builder()
@@ -160,15 +186,17 @@ public class LightSettingService {
                         .lightSetting(lightManual)
                         .build();
             case "scheduled":
-                LightScheduledRepository lightScheduledRepository = lightSettingFactory.getLightSettingRepository(LightScheduledRepository.class);
+                LightScheduledRepository lightScheduledRepository = lightSettingFactory
+                        .getLightSettingRepository(LightScheduledRepository.class);
                 LightScheduled lightScheduled = new LightScheduled();
-                if(lightSettingRequest.getFarm()!=null){
+                if (lightSettingRequest.getFarm() != null) {
                     int farm_id = lightSettingRequest.getFarm().getId();
                     Farm farm = farmRepository.findById(farm_id)
-                            .orElseThrow(()->new ResourceNotFoundException("Light Setting with "+farm_id+"doesn't exist!"));
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Light Setting with " + farm_id + "doesn't exist!"));
                     lightScheduled.setFarm(farm);
                 }
-                if(lightSettingRequest.getSendWarning()!=null){
+                if (lightSettingRequest.getSendWarning() != null) {
                     lightScheduled.setSendWarning(lightSettingRequest.getSendWarning());
                 }
                 lightScheduledRepository.save(lightScheduled);
@@ -182,31 +210,35 @@ public class LightSettingService {
         }
     }
 
-    public LightSettingResponse<? extends LightSetting> updateALightSetting(LightSettingRequest lightSettingRequest, String mode,int id){
-        switch (mode.toLowerCase()){
+    public LightSettingResponse<? extends LightSetting> updateALightSetting(LightSettingRequest lightSettingRequest,
+            String mode, int id) {
+        switch (mode.toLowerCase()) {
             case "automated":
-                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory.getLightSettingRepository(LightAutomatedRepository.class);
+                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory
+                        .getLightSettingRepository(LightAutomatedRepository.class);
                 LightAutomated lightAutomated = lightAutomatedRepository.findById(id)
-                        .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+id+"doesn't exist!"));
-                if(lightSettingRequest.getFarm()!=null){
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
+                if (lightSettingRequest.getFarm() != null) {
                     int farm_id = lightSettingRequest.getFarm().getId();
                     Farm farm = farmRepository.findById(farm_id)
-                            .orElseThrow(()->new ResourceNotFoundException("Light Setting with "+farm_id+"doesn't exist!"));
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Light Setting with " + farm_id + "doesn't exist!"));
                     lightAutomated.setFarm(farm);
                 }
-                if(lightSettingRequest.getLower()>=0){
+                if (lightSettingRequest.getLower() >= 0) {
                     lightAutomated.setLower(lightSettingRequest.getLower());
                 }
-                if(lightSettingRequest.getMin()>=0) {
+                if (lightSettingRequest.getMin() >= 0) {
                     lightAutomated.setMin(lightSettingRequest.getMin());
                 }
-                if(lightSettingRequest.getUpper()>=0){
+                if (lightSettingRequest.getUpper() >= 0) {
                     lightAutomated.setUpper(lightSettingRequest.getUpper());
                 }
-                if(lightSettingRequest.getMax()>=0){
+                if (lightSettingRequest.getMax() >= 0) {
                     lightAutomated.setMax(lightSettingRequest.getMax());
                 }
-                if(lightSettingRequest.getSendWarning()!=null) {
+                if (lightSettingRequest.getSendWarning() != null) {
                     lightAutomated.setSendWarning(lightSettingRequest.getSendWarning());
                 }
                 lightAutomatedRepository.save(lightAutomated);
@@ -216,16 +248,19 @@ public class LightSettingService {
                         .lightSetting(lightAutomated)
                         .build();
             case "manual":
-                LightManualRepository lightManualRepository = lightSettingFactory.getLightSettingRepository(LightManualRepository.class);
+                LightManualRepository lightManualRepository = lightSettingFactory
+                        .getLightSettingRepository(LightManualRepository.class);
                 LightManual lightManual = lightManualRepository.findById(id)
-                        .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+id+"doesn't exist!"));
-                if(lightSettingRequest.getFarm()!=null){
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
+                if (lightSettingRequest.getFarm() != null) {
                     int farm_id = lightSettingRequest.getFarm().getId();
                     Farm farm = farmRepository.findById(farm_id)
-                            .orElseThrow(()->new ResourceNotFoundException("Light Setting with "+farm_id+"doesn't exist!"));
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Light Setting with " + farm_id + "doesn't exist!"));
                     lightManual.setFarm(farm);
                 }
-                if(lightSettingRequest.getTurnOn()!=null){
+                if (lightSettingRequest.getTurnOn() != null) {
                     lightManual.setTurnOn(lightManual.getTurnOn());
                 }
                 lightManualRepository.save(lightManual);
@@ -235,16 +270,19 @@ public class LightSettingService {
                         .lightSetting(lightManual)
                         .build();
             case "scheduled":
-                LightScheduledRepository lightScheduledRepository = lightSettingFactory.getLightSettingRepository(LightScheduledRepository.class);
+                LightScheduledRepository lightScheduledRepository = lightSettingFactory
+                        .getLightSettingRepository(LightScheduledRepository.class);
                 LightScheduled lightScheduled = lightScheduledRepository.findById(id)
-                        .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+id+"doesn't exist!"));
-                if(lightSettingRequest.getFarm()!=null){
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
+                if (lightSettingRequest.getFarm() != null) {
                     int farm_id = lightSettingRequest.getFarm().getId();
                     Farm farm = farmRepository.findById(farm_id)
-                            .orElseThrow(()->new ResourceNotFoundException("Light Setting with "+farm_id+"doesn't exist!"));
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Light Setting with " + farm_id + "doesn't exist!"));
                     lightScheduled.setFarm(farm);
                 }
-                if(lightSettingRequest.getSendWarning()!=null){
+                if (lightSettingRequest.getSendWarning() != null) {
                     lightScheduled.setSendWarning(lightSettingRequest.getSendWarning());
                 }
                 lightScheduledRepository.save(lightScheduled);
@@ -258,12 +296,14 @@ public class LightSettingService {
         }
     }
 
-    public LightSettingResponse<? extends LightSetting> deleteLightSetting(String mode, int id){
-        switch (mode.toLowerCase()){
+    public LightSettingResponse<? extends LightSetting> deleteLightSetting(String mode, int id) {
+        switch (mode.toLowerCase()) {
             case "automated":
-                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory.getLightSettingRepository(LightAutomatedRepository.class);
+                LightAutomatedRepository lightAutomatedRepository = lightSettingFactory
+                        .getLightSettingRepository(LightAutomatedRepository.class);
                 LightAutomated lightAutomated = lightAutomatedRepository.findById(id)
-                        .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+id+"doesn't exist!"));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
                 lightAutomatedRepository.delete(lightAutomated);
                 return LightSettingResponse.builder()
                         .lightSetting(lightAutomated)
@@ -272,9 +312,11 @@ public class LightSettingService {
                         .build();
 
             case "manual":
-                LightManualRepository lightManualRepository = lightSettingFactory.getLightSettingRepository(LightManualRepository.class);
+                LightManualRepository lightManualRepository = lightSettingFactory
+                        .getLightSettingRepository(LightManualRepository.class);
                 LightManual lightManual = lightManualRepository.findById(id)
-                        .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+id+"doesn't exist!"));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
                 lightManualRepository.save(lightManual);
                 return LightSettingResponse.builder()
                         .lightSetting(lightManual)
@@ -282,9 +324,11 @@ public class LightSettingService {
                         .mode(mode)
                         .build();
             case "scheduled":
-                LightScheduledRepository lightScheduledRepository = lightSettingFactory.getLightSettingRepository(LightScheduledRepository.class);
+                LightScheduledRepository lightScheduledRepository = lightSettingFactory
+                        .getLightSettingRepository(LightScheduledRepository.class);
                 LightScheduled lightScheduled = lightScheduledRepository.findById(id)
-                        .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+id+"doesn't exist!"));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Light Setting with id " + id + "doesn't exist!"));
                 lightScheduledRepository.save(lightScheduled);
                 return LightSettingResponse.builder()
                         .lightSetting(lightScheduled)

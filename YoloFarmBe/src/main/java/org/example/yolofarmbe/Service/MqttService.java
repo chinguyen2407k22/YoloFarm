@@ -53,7 +53,6 @@ public class MqttService {
 
    private FarmRepository farmRepository;
 
-   @Autowired
    public MqttService(RecordService recordService, FarmRepository farmRepository) {
       try {
          this.recordService = recordService;
@@ -156,25 +155,9 @@ public class MqttService {
          // Random random = new Random();
          // int x = random.nextInt(10);
          // // publishMessage(FEED_TEMPERATURE, String.valueOf(random.nextInt(60)));
-         // publishMessage(FEED_MOISTURE, String.valueOf(random.nextInt(60)));
+         // publishMessage(FEED_MOISTURE, String.valueOf(random.nextInt(100)));
          // // publishMessage(FEED_HUMIDITY, String.valueOf(random.nextInt(60)));
-         // publishMessage(FEED_WATER, String.valueOf(random.nextDouble(1)));
-         // if (x % 2 == 0) {
-         // publishMessage(FEED_FAN, "0");
-         // // publishMessage(FEED_MTOGGLE, "MW-0");
-         // x++;
-         // } else {
-         // publishMessage(FEED_FAN, "1");
-         // // publishMessage(FEED_MTOGGLE, "MW-1");
-         // x++;
-         // }
-
-         // Farm farm = new Farm();
-         // farm.setCrop("tonton");
-         // farm.setFarmName("tonton");
-         // farm.setFarmSize(100.0);
-         // farm.setId(1);
-         // farmService.addNewFarm(farm);
+         // publishMessage(FEED_LIGHT, String.valueOf(random.nextInt(5000)));
 
       } catch (Exception e) {
          e.printStackTrace();
@@ -186,7 +169,7 @@ public class MqttService {
          MqttMessage mqttMessage = new MqttMessage(message.getBytes());
          mqttMessage.setQos(1);
          client.publish(USERNAME + "/feeds/" + FEED_NAME, mqttMessage);
-         System.out.println("Published message: " + message);
+         System.out.println("Published to Feed:" + FEED_NAME + " - message:" + message);
       } catch (MqttException e) {
          e.printStackTrace();
       }

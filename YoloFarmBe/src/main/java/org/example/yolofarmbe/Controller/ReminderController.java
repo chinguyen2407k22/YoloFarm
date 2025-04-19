@@ -1,5 +1,6 @@
 package org.example.yolofarmbe.Controller;
 
+import org.example.yolofarmbe.DTO.ReminderView;
 import org.example.yolofarmbe.Entity.Reminder;
 import org.example.yolofarmbe.Entity.ReminderId;
 import org.example.yolofarmbe.Exception.ResourceNotFoundException;
@@ -23,7 +24,7 @@ public class ReminderController {
     }
 
     @GetMapping("/user/{username}")
-    public List<Reminder> getAReminderByUsername(@PathVariable String username ){
+    public List<ReminderView> getAReminderByUsername(@PathVariable String username ){
         return reminderService.getAllReminderOfAUser(username);
     }
 

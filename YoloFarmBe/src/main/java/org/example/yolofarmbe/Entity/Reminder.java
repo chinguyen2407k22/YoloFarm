@@ -22,7 +22,6 @@ public class Reminder {
     private String title;
 
     @Nationalized
-    @Lob
     @Column(name = "reminder_description")
     private String reminderDescription;
 

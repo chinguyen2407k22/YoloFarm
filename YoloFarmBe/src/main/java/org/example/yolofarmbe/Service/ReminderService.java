@@ -1,5 +1,6 @@
 package org.example.yolofarmbe.Service;
 
+import org.example.yolofarmbe.DTO.ReminderView;
 import org.example.yolofarmbe.Entity.Reminder;
 import org.example.yolofarmbe.Entity.ReminderId;
 import org.example.yolofarmbe.Entity.UserAccount;
@@ -26,7 +27,7 @@ public class ReminderService {
         return reminderRepository.findAll();
     }
 
-    public List<Reminder> getAllReminderOfAUser(String username){
+    public List<ReminderView> getAllReminderOfAUser(String username){
         return reminderRepository.findByUsername_Username(username);
     }
 

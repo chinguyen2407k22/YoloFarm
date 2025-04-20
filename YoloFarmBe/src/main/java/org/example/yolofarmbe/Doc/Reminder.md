@@ -91,10 +91,9 @@ Request format:
 method: DELETE
 body:
 {
-    id: {
-        id: int,
-        username: String
-    }
+    id: int,
+    username: String
+    
 }
 //Do reminder là thực thể yếu của user nên id gồm id của reminder và username của user
 Response format:

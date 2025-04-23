@@ -174,9 +174,9 @@ public class TemperatureSettingService {
                                 if (request.getSunShade() != null) {
                                         temperatureManual.setSunShade(request.getSunShade());
                                         if (request.getSunShade() == State.ON) {
-                                                mqttService.publishMessage("fan", "1");
+                                                mqttService.publishMessage("water", "1");
                                         } else {
-                                                mqttService.publishMessage("fan", "0");
+                                                mqttService.publishMessage("water", "0");
 
                                         }
                                 }

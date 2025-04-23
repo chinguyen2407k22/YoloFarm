@@ -6,8 +6,6 @@ import org.example.yolofarmbe.Response.TemperatureMqtt;
 import org.example.yolofarmbe.Service.MqttService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/mqtt")
@@ -39,9 +37,13 @@ public class MqttController {
       return mqttService.getAllTemperatureData("light");
    }
 
-   @PostMapping("/water")
-   public void waterOn() {
-      mqttService.publishMessage("water", "1");
+   @PostMapping("/water/{val}")
+   public void water(@PathVariable String val) {
+      mqttService.publishMessage("water", val);
    }
 
+   @PostMapping("/fan/{val}")
+   public void fan(@PathVariable String val) {
+      mqttService.publishMessage("fan", val);
+   }
 }

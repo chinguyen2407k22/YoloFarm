@@ -17,9 +17,11 @@ import org.example.yolofarmbe.Exception.ResourceNotFoundException;
 import org.example.yolofarmbe.Repository.FarmRepository;
 import org.example.yolofarmbe.Repository.RecordRepository;
 import org.example.yolofarmbe.Response.AdafruitResponse;
+import org.example.yolofarmbe.Response.TemperatureMqtt;
 
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -37,13 +39,12 @@ public class MqttService {
    private final String USERNAME = "fungchill";
    private final String AIO_KEY = "aio_qhOp85Q5RZjfaYcpSMyizOk0gTDp";
 
-   // private final String FEED_TEMPERATURE = "temperature";
+   private final String FEED_TEMPERATURE = "temperature";
    private final String FEED_MOISTURE = "moisture";
-   // private final String FEED_HUMIDITY = "humidity";
+   private final String FEED_HUMIDITY = "humidity";
    private final String FEED_LIGHT = "light";
    private final String FEED_WATER = "water";
    private final String FEED_FAN = "fan";
-   // private final String FEED_MTOGGLE = "m-toggle";
 
    private MqttClient client;
 
@@ -78,7 +79,8 @@ public class MqttService {
 
          HttpEntity<String> entity = new HttpEntity<>(headers);
 
-         List<String> feeds = Arrays.asList(FEED_MOISTURE, FEED_WATER, FEED_FAN, FEED_LIGHT);
+         List<String> feeds = Arrays.asList(FEED_MOISTURE, FEED_WATER, FEED_FAN, FEED_LIGHT, FEED_HUMIDITY,
+               FEED_TEMPERATURE);
 
          for (String feed : feeds) {
 
@@ -99,7 +101,7 @@ public class MqttService {
             // amountofwaterRecord.setRecordValue(Double.parseDouble(response.getBody().get(0).getValue()));
             // amountofwaterRecord.setRecordTime(Instant.now());
             // amountofwaterRecord.setFarm(farm);
-            // recordService.SaveRecords(feed, amountofwaterRecord);
+            // // recordService.SaveRecords(feed, amountofwaterRecord);
 
             // System.out.println("Fetched data from " + feed + ": " +
             // response.getBody().get(0).getValue());
@@ -116,29 +118,25 @@ public class MqttService {
                      .orElseThrow(() -> new ResourceNotFoundException("Farm with id " + farm_id +
                            "not exist"));
 
-               // if (feed.equals(FEED_TEMPERATURE)) {
-               // TemperatureRecord temperatureRecord = new TemperatureRecord();
-               // temperatureRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
-               // temperatureRecord.setRecordTime(Instant.now());
-               // temperatureRecord.setFarm(farm);
-               // recordService.SaveRecords(feed, temperatureRecord);
-               // } else
-               if (feed.equals(FEED_MOISTURE)) {
+               if (feed.equals(FEED_TEMPERATURE)) {
+                  TemperatureRecord temperatureRecord = new TemperatureRecord();
+                  temperatureRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
+                  temperatureRecord.setRecordTime(Instant.now());
+                  temperatureRecord.setFarm(farm);
+                  recordService.SaveRecords(feed, temperatureRecord);
+               } else if (feed.equals(FEED_MOISTURE)) {
                   MoistureRecord moistureRecord = new MoistureRecord();
                   moistureRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
                   moistureRecord.setRecordTime(Instant.now());
                   moistureRecord.setFarm(farm);
                   recordService.SaveRecords(feed, moistureRecord);
-               }
-               // else
-               // if (feed.equals(FEED_HUMIDITY)) {
-               // HumidityRecord humidityRecord = new HumidityRecord();
-               // humidityRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
-               // humidityRecord.setRecordTime(Instant.now());
-               // humidityRecord.setFarm(farm);
-               // recordService.SaveRecords(feed, humidityRecord);
-               // } else
-               if (feed.equals(FEED_LIGHT)) {
+               } else if (feed.equals(FEED_HUMIDITY)) {
+                  HumidityRecord humidityRecord = new HumidityRecord();
+                  humidityRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
+                  humidityRecord.setRecordTime(Instant.now());
+                  humidityRecord.setFarm(farm);
+                  recordService.SaveRecords(feed, humidityRecord);
+               } else if (feed.equals(FEED_LIGHT)) {
                   LightRecord lightRecord = new LightRecord();
                   lightRecord.setRecordValue(Double.parseDouble(response.getBody().getValue()));
                   lightRecord.setRecordTime(Instant.now());
@@ -153,10 +151,17 @@ public class MqttService {
          System.out.println("\n----------------------------------------------------------------------");
 
          // Random random = new Random();
-         // int x = random.nextInt(10);
-         // // publishMessage(FEED_TEMPERATURE, String.valueOf(random.nextInt(60)));
+         // int btn = random.nextInt(4);
+         // if (btn % 2 == 0) {
+         // publishMessage(FEED_FAN, "0");
+         // publishMessage(FEED_WATER, "0");
+         // } else {
+         // publishMessage(FEED_FAN, "1");
+         // publishMessage(FEED_WATER, "1");
+         // }
+         // publishMessage(FEED_TEMPERATURE, String.valueOf(random.nextInt(60)));
          // publishMessage(FEED_MOISTURE, String.valueOf(random.nextInt(100)));
-         // // publishMessage(FEED_HUMIDITY, String.valueOf(random.nextInt(60)));
+         // publishMessage(FEED_HUMIDITY, String.valueOf(random.nextInt(60)));
          // publishMessage(FEED_LIGHT, String.valueOf(random.nextInt(5000)));
 
       } catch (Exception e) {
@@ -173,5 +178,28 @@ public class MqttService {
       } catch (MqttException e) {
          e.printStackTrace();
       }
+   }
+
+   public List<String> getAllTemperatureData(String FEED_NAME) {
+      HttpHeaders headers = new HttpHeaders();
+      headers.set("X-AIO-Key", AIO_KEY);
+
+      HttpEntity<String> entity = new HttpEntity<>(headers);
+
+      String url = "https://io.adafruit.com/api/v2/" + USERNAME + "/feeds/" + FEED_NAME + "/data";
+
+      ResponseEntity<TemperatureMqtt[]> response = restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            entity,
+            TemperatureMqtt[].class);
+
+      if (response.getBody() == null) {
+         return List.of();
+      }
+
+      return Arrays.stream(response.getBody())
+            .map(TemperatureMqtt::getValue)
+            .collect(Collectors.toList());
    }
 }

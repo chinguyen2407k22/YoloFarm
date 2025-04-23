@@ -1,8 +1,13 @@
 package org.example.yolofarmbe.Controller;
 
+import java.util.List;
+
+import org.example.yolofarmbe.Response.TemperatureMqtt;
 import org.example.yolofarmbe.Service.MqttService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/mqtt")
@@ -14,34 +19,29 @@ public class MqttController {
       this.mqttService = mqttService;
    }
 
-   @PostMapping("/temperature")
-   public String SendTemperature(@RequestParam String value) {
-      mqttService.publishMessage("temperature", value);
-      return "Message sent: " + value;
+   @GetMapping("/temperature")
+   public List<String> getAllTemperatureDataMqtt() {
+      return mqttService.getAllTemperatureData("temperature");
    }
 
-   @PostMapping("/moisture")
-   public String SendMoisture(@RequestParam String value) {
-      mqttService.publishMessage("moisture", value);
-      return "Message sent: " + value;
+   @GetMapping("/moisture")
+   public List<String> getAllMoistureDataMqtt() {
+      return mqttService.getAllTemperatureData("moisture");
    }
 
-   @PostMapping("/humidity")
-   public String SendHumidity(@RequestParam String value) {
-      mqttService.publishMessage("humidity", value);
-      return "Message sent: " + value;
+   @GetMapping("/humidity")
+   public List<String> getAllHumidityDataMqtt() {
+      return mqttService.getAllTemperatureData("humidity");
    }
 
-   @PostMapping("/a-toggle")
-   public String SendaToggle(@RequestParam String value) {
-      mqttService.publishMessage("a-toggle", value);
-      return "Message sent: " + value;
+   @GetMapping("/light")
+   public List<String> getAllLightDataMqtt() {
+      return mqttService.getAllTemperatureData("light");
    }
 
-   @PostMapping("/m-toggle")
-   public String SendmToggle(@RequestParam String value) {
-      mqttService.publishMessage("m-toggle", value);
-      return "Message sent: " + value;
+   @PostMapping("/water")
+   public void waterOn() {
+      mqttService.publishMessage("water", "1");
    }
 
 }

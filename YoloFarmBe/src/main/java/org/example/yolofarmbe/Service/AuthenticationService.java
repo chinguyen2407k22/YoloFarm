@@ -1,6 +1,7 @@
 package org.example.yolofarmbe.Service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.yolofarmbe.DTO.UserView;
 import org.example.yolofarmbe.Entity.Farm;
 import org.example.yolofarmbe.Entity.UserAccount;
 import org.example.yolofarmbe.Exception.IncorrectPasswordException;
@@ -32,12 +33,10 @@ public class AuthenticationService {
 
     public UserResponse registerUser(RegisterRequest request) {
 
-        // Kiểm tra username đã tồn tại chưa
         if (userAccountRepository.existsByUsername(request.getUsername())) {
             throw new UserAlreadyExistsException();
         }
 
-        // Mã hóa password trước khi lưu
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         Farm farm = null;
@@ -46,7 +45,7 @@ public class AuthenticationService {
             farm = farmRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Farm with id "+ id + "not exists"));
         }
-        // Tạo user mới
+
         UserAccount newUser = UserAccount.builder()
                 .username(request.getUsername())
                 .hashPassword((encodedPassword))
@@ -58,10 +57,12 @@ public class AuthenticationService {
                 .build();
 
         userAccountRepository.save(newUser);
+        UserView  userView = userAccountRepository.findProjectedByUsername(request.getUsername())
+                .orElseThrow(()->new UserNotFoundException());
 
         return UserResponse.builder()
                 .message("User registered successfully")
-                .userAccount(newUser)
+                .userView(userView)
                 .build();
     }
 
@@ -70,9 +71,11 @@ public class AuthenticationService {
                 .orElseThrow(()->new UserNotFoundException());
 
         if (passwordEncoder.matches(loginRequest.getPassword(),userAccount.getHashPassword())){
+            UserView  userView = userAccountRepository.findProjectedByUsername(loginRequest.getUsername())
+                    .orElseThrow(()->new UserNotFoundException());
             return UserResponse.builder()
                     .message("User login successfully")
-                    .userAccount(userAccount)
+                    .userView(userView)
                     .build();
         }
         else throw new IncorrectPasswordException();

@@ -1,5 +1,6 @@
 package org.example.yolofarmbe.Service;
 
+import org.example.yolofarmbe.DTO.UserView;
 import org.example.yolofarmbe.Entity.Farm;
 import org.example.yolofarmbe.Entity.UserAccount;
 import org.example.yolofarmbe.Exception.ResourceNotFoundException;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
+
 @Service
 public class UserService {
     @Autowired
@@ -23,10 +26,14 @@ public class UserService {
     @Autowired
     private FarmRepository farmRepository;
 
-    public UserAccount getUserByUsername(String username){
-        UserAccount userAccount = userAccountRepository.findByUsername(username)
+    public List<UserView> getAllUserOfAFarm(int farm_id){
+        return userAccountRepository.findAllByFarmId(farm_id);
+    }
+
+    public UserView getUserByUsername(String username){
+        UserView userView = userAccountRepository.findProjectedByUsername(username)
                 .orElseThrow(()->new UserNotFoundException());
-        return  userAccount;
+        return  userView;
     }
 
     public UserResponse updateUserAccount(String username, UserRequest request){
@@ -51,19 +58,23 @@ public class UserService {
             userAccount.setFarm(farm);
         }
         userAccountRepository.save(userAccount);
+        UserView userView = userAccountRepository.findProjectedByUsername(username)
+                .orElseThrow(()->new UserNotFoundException());
         return UserResponse.builder()
                 .message("Update user account successfully!")
-                .userAccount(userAccount)
+                .userView(userView)
                 .build();
     }
 
     public UserResponse deleteUserAccount(String username){
+        UserView userView = userAccountRepository.findProjectedByUsername(username)
+                .orElseThrow(()->new UserNotFoundException());
         UserAccount userAccount = userAccountRepository.findByUsername(username)
                 .orElseThrow(()->new UserNotFoundException());
         userAccountRepository.delete(userAccount);
         return UserResponse.builder()
                 .message("Delete user account successfully!")
-                .userAccount(userAccount)
+                .userView(userView)
                 .build();
     }
 }

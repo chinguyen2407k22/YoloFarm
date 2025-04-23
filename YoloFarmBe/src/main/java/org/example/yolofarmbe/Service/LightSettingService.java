@@ -275,7 +275,7 @@ public class LightSettingService {
                 LightManualRepository lightManualRepository = lightSettingFactory.getLightSettingRepository(LightManualRepository.class);
                 LightManual lightManual = lightManualRepository.findById(id)
                         .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+id+"doesn't exist!"));
-                lightManualRepository.save(lightManual);
+                lightManualRepository.delete(lightManual);
                 return LightSettingResponse.builder()
                         .lightSetting(lightManual)
                         .message("Delete light setting successfully!")
@@ -285,7 +285,7 @@ public class LightSettingService {
                 LightScheduledRepository lightScheduledRepository = lightSettingFactory.getLightSettingRepository(LightScheduledRepository.class);
                 LightScheduled lightScheduled = lightScheduledRepository.findById(id)
                         .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+id+"doesn't exist!"));
-                lightScheduledRepository.save(lightScheduled);
+                lightScheduledRepository.delete(lightScheduled);
                 return LightSettingResponse.builder()
                         .lightSetting(lightScheduled)
                         .message("Delete light setting successfully!")

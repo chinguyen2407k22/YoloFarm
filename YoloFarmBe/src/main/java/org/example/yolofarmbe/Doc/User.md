@@ -1,5 +1,14 @@
 ## User API
 ### Get user API
+#### API: localhost:8080/api/users/farm/{farm_id}
+function: Lấy danh sách tất cả user của một nông trại
+Request format:
+method: GET
+body: None
+Response format:
+{
+    List<User>
+}
 #### API: localhost:8080/api/users/{username}
 function: Lấy thông tin của user thông qua username
 Request format:

@@ -18,9 +18,9 @@ public class ReminderController {
     @Autowired
     private ReminderService reminderService;
 
-    @GetMapping
-    public List<Reminder> getAllReminder(){
-        return reminderService.getAllReminder();
+    @GetMapping("/farm/{farm_id}")
+    public List<ReminderView> getAllReminder(@PathVariable int farm_id){
+        return reminderService.getAllReminderOfAFarm(farm_id);
     }
 
     @GetMapping("/user/{username}")

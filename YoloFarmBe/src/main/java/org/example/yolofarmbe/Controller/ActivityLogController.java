@@ -1,5 +1,6 @@
 package org.example.yolofarmbe.Controller;
 
+import org.example.yolofarmbe.DTO.ActivityLogView;
 import org.example.yolofarmbe.Entity.ActivityLog;
 import org.example.yolofarmbe.Exception.ResourceNotFoundException;
 import org.example.yolofarmbe.Response.ActivityLogResponse;
@@ -18,14 +19,23 @@ public class ActivityLogController {
     private ActivityLogService activityLogService;
 
     @GetMapping
-    public List<ActivityLog> getAllActivityLogs(){
+    public List<ActivityLogView> getAllActivityLogs(){
         return activityLogService.getAllActivityLogs();
     }
 
-    @GetMapping("/farm/{id}")
-    public List<ActivityLog> getActivitiyLogsOfAFarm(@PathVariable int id){
+    @GetMapping("/user/{username}")
+    public List<ActivityLogView> getActivitiyLogsOfAUser(@PathVariable String username){
         try {
-            return activityLogService.getAllActivityLogOfAFarm(id);
+            return activityLogService.getAllActivityLogOfAUser(username);
+        }catch (ResourceNotFoundException e){
+            return null;
+        }
+    }
+
+    @GetMapping("/farm/{farm_id}")
+    public List<ActivityLogView> getAllActivityLogsOfAFarm(@PathVariable int farm_id){
+        try {
+            return  activityLogService.getAllActivityLogOfAFarm(farm_id);
         }catch (ResourceNotFoundException e){
             return null;
         }

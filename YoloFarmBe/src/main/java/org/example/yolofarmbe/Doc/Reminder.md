@@ -1,13 +1,30 @@
 ## Reminder API
+Định dạng của mỗi đối tượng Reminder trả về
+{
+    "id": {
+        "id": 8,
+        "username": "username1"
+    },
+    "title": "Irrigation Filter Check",
+    "reminderDescription": "Check and clean the irrigation filters.",
+    "userAccount": {
+        "username": "username1"
+        "lastname": "Farm",
+        "firstname": "User"
+    },
+    "isDone": false,
+    "reminderTime": "2025-04-21T14:00:00"
+}
 ### Get All reminder
-#### API: localhost:8080/api/reminders
-function: lấy danh sách tất cả các reminder của tất cả các user
+#### API: localhost:8080/api/reminders/farm/{farm_id}
+function: lấy danh sách tất cả các reminder của một farm
 Request format:
 method: GET
 body: none
 Response format:
 {
     List<Reminders>
+    //Các reminder được sắp xếp theo thứ tự thời gian tăng dần
 }
 
 ### Get All reminder of a user
@@ -19,6 +36,7 @@ body: none
 Response format:
 {
     List<Reminders>
+    //Sắp xếp theo id
 }
 
 ### Get a reminder by id

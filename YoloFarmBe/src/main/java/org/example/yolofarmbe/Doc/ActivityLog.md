@@ -1,7 +1,31 @@
 ## Activity Log API
+Định dạng một activity log
+"activityLog": {
+    "id": 11,
+    "mode": "scheduled",
+    "title": "Maintained stable temperature",
+    "logTime": "11:00:00",
+    "category": "temperature",
+    "userAccount": {
+        "username": "username1",
+        "lastname": "Farm",
+        "firstname": "User"
+    }
+}
 ### Get All Activity Log API
 #### API: localhost:8080/api/activitylogs
-function: Lấy danh sách tất cả activity logs
+function: Lấy danh sách tất cả activity logs có trong database
+Request format:
+method: GET
+body: None
+Response format:
+{
+    List<ActivityLog>
+}
+
+### Get an activity logs by username
+#### API: localhost:8080/api/activitylogs/user/{username}
+function: Lấy danh sách tất cả activity logs của một người dùng
 Request format:
 method: GET
 body: None
@@ -44,8 +68,8 @@ body:
     title: String
     mode: String
     logTime: hh:mm:ss
-    farm: {
-        id: int
+    userAccount: {
+        username: String
     }
 }
 Response format:

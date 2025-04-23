@@ -30,7 +30,7 @@ public class AuthenticationController {
             return ResponseEntity.badRequest()
                     .body(UserResponse.builder()
                             .message("Username already exists")
-                            .userAccount(null)
+                            .userView(null)
                             .build());
         }
     }
@@ -43,13 +43,13 @@ public class AuthenticationController {
             return ResponseEntity.badRequest()
                     .body(UserResponse.builder()
                             .message("Username does not exist!")
-                            .userAccount(null)
+                            .userView(null)
                             .build());
         }catch (IncorrectPasswordException e){
             return ResponseEntity.badRequest()
                     .body(UserResponse.builder()
                             .message("Password Incorrect!")
-                            .userAccount(null)
+                            .userView(null)
                             .build());
         }
     }

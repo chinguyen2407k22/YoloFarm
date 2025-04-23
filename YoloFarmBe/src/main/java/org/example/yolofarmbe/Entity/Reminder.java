@@ -15,7 +15,7 @@ public class Reminder {
     @MapsId("username")
     @ManyToOne(optional = false)
     @JoinColumn(name = "username", nullable = false)
-    private UserAccount username;
+    private UserAccount userAccount;
 
     @Nationalized
     @Column(name = "title")
@@ -39,12 +39,12 @@ public class Reminder {
         this.id = id;
     }
 
-    public UserAccount getUsername() {
-        return username;
+    public UserAccount getUserAccount() {
+        return userAccount;
     }
 
-    public void setUsername(UserAccount username) {
-        this.username = username;
+    public void setUserAccount(UserAccount userAccount) {
+        this.userAccount = userAccount;
     }
 
     public String getTitle() {

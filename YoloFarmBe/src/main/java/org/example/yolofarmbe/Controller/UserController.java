@@ -1,5 +1,6 @@
 package org.example.yolofarmbe.Controller;
 
+import org.example.yolofarmbe.DTO.UserView;
 import org.example.yolofarmbe.Entity.UserAccount;
 import org.example.yolofarmbe.Exception.ResourceNotFoundException;
 import org.example.yolofarmbe.Exception.UserNotFoundException;
@@ -10,22 +11,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
     @Autowired
     UserService userService;
 
+    @GetMapping("/farm/{farm_id}")
+    public List<UserView> getAllUserByFarm(@PathVariable int farm_id){
+        return userService.getAllUserOfAFarm(farm_id);
+    }
+
     @GetMapping("/{username}")
     public ResponseEntity<?> getUserAccountByUsername(@PathVariable String username){
         try {
-            UserAccount userAccount = userService.getUserByUsername(username);
+            UserView userAccount = userService.getUserByUsername(username);
             return  ResponseEntity.ok(userAccount);
         } catch (UserNotFoundException e){
             return ResponseEntity.badRequest()
                     .body(UserResponse.builder()
                             .message("Username does not exists!")
-                            .userAccount(null)
+                            .userView(null)
                             .build());
         }
     }
@@ -39,14 +47,14 @@ public class UserController {
             return ResponseEntity.badRequest()
                     .body(UserResponse.builder()
                             .message("Username does not exists!")
-                            .userAccount(null)
+                            .userView(null)
                             .build());
         } catch (ResourceNotFoundException e){
             int id = userRequest.getFarm().getId();
             return ResponseEntity.badRequest()
                     .body(UserResponse.builder()
                             .message("Farm with id " + id + " does not exist!")
-                            .userAccount(null)
+                            .userView(null)
                             .build());
         }
     }
@@ -60,7 +68,7 @@ public class UserController {
             return ResponseEntity.badRequest()
                     .body(UserResponse.builder()
                             .message("Username does not exists!")
-                            .userAccount(null)
+                            .userView(null)
                             .build());
         }
     }

@@ -10,5 +10,6 @@ public interface ReminderView {
     LocalDateTime getReminderTime();
     String getReminderDescription();
     Boolean getIsDone();
+    UsernameView getUserAccount();
 }
 

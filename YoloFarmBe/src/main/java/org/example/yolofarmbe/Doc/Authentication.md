@@ -29,7 +29,7 @@ method: POST
 body:
 {
     username: String
-    password: String
+    password: String (abcxyz123)
 }
 Response format:
 {

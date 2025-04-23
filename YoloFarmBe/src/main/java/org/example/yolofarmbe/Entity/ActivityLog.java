@@ -30,8 +30,8 @@ public class ActivityLog {
     private LocalTime logTime;
 
     @ManyToOne()
-    @JoinColumn(name = "farm_id")
-    private Farm farm;
+    @JoinColumn(name = "username")
+    private UserAccount userAccount;
 
     public Integer getId() {
         return id;
@@ -73,12 +73,11 @@ public class ActivityLog {
         this.logTime = logTime;
     }
 
-    public Farm getFarm() {
-        return farm;
+    public UserAccount getUserAccount() {
+        return userAccount;
     }
 
-    public void setFarm(Farm farm) {
-        this.farm = farm;
+    public void setUserAccount(UserAccount userAccount) {
+        this.userAccount = userAccount;
     }
-
 }

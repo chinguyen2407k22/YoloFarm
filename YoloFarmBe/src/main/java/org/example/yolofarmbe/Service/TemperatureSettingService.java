@@ -18,9 +18,6 @@ public class TemperatureSettingService {
         private TemperatureSettingFactory temperatureSettingFactory;
 
         @Autowired
-        private MqttService mqttService;
-
-        @Autowired
         private FarmRepository farmRepository;
 
         public List<? extends TemperatureSetting> getAllTemperatureSetting(String mode) {
@@ -173,12 +170,6 @@ public class TemperatureSettingService {
                                 }
                                 if (request.getSunShade() != null) {
                                         temperatureManual.setSunShade(request.getSunShade());
-                                        if (request.getSunShade() == State.ON) {
-                                                mqttService.publishMessage("water", "1");
-                                        } else {
-                                                mqttService.publishMessage("water", "0");
-
-                                        }
                                 }
                                 temperatureManualRepository.save(temperatureManual);
                                 return TemperatureSettingResponse.builder()

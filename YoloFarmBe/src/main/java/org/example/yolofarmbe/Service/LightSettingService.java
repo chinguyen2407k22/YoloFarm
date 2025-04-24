@@ -26,9 +26,6 @@ public class LightSettingService {
     @Autowired
     private SchedulerService schedulerService;
 
-    @Autowired
-    private MqttService mqttService;
-
     public List<? extends LightSetting> getAllLightSetting(String mode) {
         switch (mode.toLowerCase()) {
             case "automated":
@@ -172,12 +169,6 @@ public class LightSettingService {
                 }
                 if (lightSettingRequest.getTurnOn() != null) {
                     lightManual.setTurnOn(lightSettingRequest.getTurnOn());
-                    if (lightSettingRequest.getTurnOn() == State.ON) {
-                        mqttService.publishMessage("water", "1");
-                    } else {
-                        mqttService.publishMessage("water", "0");
-
-                    }
                 }
                 lightManualRepository.save(lightManual);
                 return LightSettingResponse.builder()

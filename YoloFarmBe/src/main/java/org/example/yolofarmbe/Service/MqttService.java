@@ -2,34 +2,58 @@ package org.example.yolofarmbe.Service;
 
 import org.springframework.http.HttpHeaders;
 
+import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 
 import org.eclipse.paho.client.mqttv3.*;
 import org.example.yolofarmbe.Entity.AmountOfWaterRecord;
+import org.example.yolofarmbe.Entity.DailyTask;
 import org.example.yolofarmbe.Entity.Farm;
 import org.example.yolofarmbe.Entity.Record;
 import org.example.yolofarmbe.Entity.HumidityRecord;
 import org.example.yolofarmbe.Entity.LightRecord;
+import org.example.yolofarmbe.Entity.LightScheduled;
 import org.example.yolofarmbe.Entity.MoistureRecord;
 import org.example.yolofarmbe.Entity.TemperatureRecord;
 import org.example.yolofarmbe.Exception.ResourceNotFoundException;
+import org.example.yolofarmbe.Repository.DailyTaskRepository;
 import org.example.yolofarmbe.Repository.FarmRepository;
 import org.example.yolofarmbe.Repository.RecordRepository;
+import org.example.yolofarmbe.Request.SchedulerRequest;
 import org.example.yolofarmbe.Response.AdafruitResponse;
-import org.example.yolofarmbe.Response.TemperatureMqtt;
+import org.example.yolofarmbe.Response.FeedMqttResponse;
+import org.example.yolofarmbe.Response.RangeValueMqttResponse;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -38,7 +62,7 @@ public class MqttService {
    private final String BROKER_URL = "tcp://io.adafruit.com:1883";
    private final String USERNAME = "fungchill";
    private final String AIO_KEY = "aio_qhOp85Q5RZjfaYcpSMyizOk0gTDp";
-
+   private final String DASHBOARD_KEY = "yolo-farm";
    private final String FEED_TEMPERATURE = "temperature";
    private final String FEED_MOISTURE = "moisture";
    private final String FEED_HUMIDITY = "humidity";
@@ -48,22 +72,27 @@ public class MqttService {
 
    private MqttClient client;
 
+   @Autowired
    private RecordService recordService;
 
-   private RestTemplate restTemplate = new RestTemplate();
+   @Autowired
+   private RestTemplate restTemplate;
 
+   @Autowired
    private FarmRepository farmRepository;
 
-   public MqttService(RecordService recordService, FarmRepository farmRepository) {
+   @Autowired
+   private TaskScheduler taskScheduler;
+
+   private final Map<String, ScheduledFuture<?>> tasks = new ConcurrentHashMap<>();
+
+   public MqttService() {
       try {
-         this.recordService = recordService;
-         this.farmRepository = farmRepository;
          client = new MqttClient(BROKER_URL, MqttClient.generateClientId());
          MqttConnectOptions options = new MqttConnectOptions();
          options.setUserName(USERNAME);
          options.setPassword(AIO_KEY.toCharArray());
          client.connect(options);
-
          client.subscribe(USERNAME + "/feeds/+");
 
       } catch (MqttException e) {
@@ -71,7 +100,7 @@ public class MqttService {
       }
    }
 
-   @Scheduled(fixedRate = 30 * 1000)
+   @Scheduled(fixedRate = 10 * 1000)
    public void fetchDataFromAdafruit() {
       try {
          HttpHeaders headers = new HttpHeaders();
@@ -169,6 +198,108 @@ public class MqttService {
       }
    }
 
+   @Async
+   public void TaskRepeat(String FEED_NAME, long duration, String cronExpression) {
+      System.out.println("Turn on device automation");
+
+      Runnable task = () -> {
+         System.out.println("Start " + FEED_NAME + " device");
+         publishMessage(FEED_NAME, "1");
+         long endTime = System.currentTimeMillis() + duration;
+         int i = 0;
+         while (System.currentTimeMillis() < endTime) {
+            System.out.println("Task run" + FEED_NAME + ": " + ++i);
+            try {
+               Thread.sleep(1000); // Thực hiện mỗi giây
+            } catch (InterruptedException e) {
+               Thread.currentThread().interrupt();
+            }
+         }
+         publishMessage(FEED_NAME, "0");
+         System.out.println("Start " + FEED_NAME + " device");
+
+      };
+
+      CronTrigger cronTrigger = new CronTrigger(cronExpression);
+      ScheduledFuture<?> future = taskScheduler.schedule(task, cronTrigger);
+      tasks.put(FEED_NAME, future); // first exec
+   }
+
+   // @Async
+   public void TurnOnDeviceAuto(String FEED_NAME, String schedulerType, SchedulerRequest schedulerRequest,
+         long duration) {
+      // long duration = schedulerRequest.getDuration();
+      // long duration = 5000;
+      switch (schedulerType.toLowerCase()) {
+         case "daily":
+
+            String cronExpression = "* * * * * *";
+            TaskRepeat(FEED_NAME, duration, cronExpression);
+
+            // LocalTime time = schedulerRequest.getTime();
+            // String hour = String.valueOf(time.getHour());
+            // String minute = String.valueOf(time.getMinute());
+
+            // String cronExpression = "* " + minute + " " + hour + " * * *";
+
+            // TaskRepeat(FEED_NAME, duration, cronExpression);
+
+            break;
+         case "weekly":
+            LocalTime weekly_time = schedulerRequest.getTime();
+            String weekly_hour = String.valueOf(weekly_time.getHour());
+            String weekly_minute = String.valueOf(weekly_time.getMinute());
+
+            List<DayOfWeek> dayofweeks = Optional.ofNullable(schedulerRequest.getDayOfWeeks())
+                  .orElse(Collections.emptyList());
+
+            String dayofweekCron = dayofweeks.stream()
+                  .map(DayOfWeek::name)
+                  .collect(Collectors.joining(","));
+
+            String weekly_cronExpression = "* " + weekly_minute + " " + weekly_hour + " * * " + dayofweekCron;
+            TaskRepeat(FEED_NAME, duration, weekly_cronExpression);
+            break;
+         case "monthly":
+            // xử lý theo tháng năm
+            LocalTime monthly_time = schedulerRequest.getTime();
+            String monthly_hour = String.valueOf(monthly_time.getHour());
+            String monthly_minute = String.valueOf(monthly_time.getMinute());
+
+            List<DayOfWeek> monthly_dayofweeks = Optional.ofNullable(schedulerRequest.getDayOfWeeks())
+                  .orElse(Collections.emptyList());
+
+            String monthly_dayofweekCron = monthly_dayofweeks.stream()
+                  .map(DayOfWeek::name)
+                  .collect(Collectors.joining(","));
+
+            List<LocalDate> dayofmonth = Optional.ofNullable(schedulerRequest.getDays())
+                  .orElse(Collections.emptyList());
+
+            String monthly_dayofmonthCron = "";
+
+            String monthly_cronExpression = "* " + monthly_minute + " " + monthly_hour + " * * "
+                  + monthly_dayofweekCron;
+
+            TaskRepeat(FEED_NAME, duration, monthly_cronExpression);
+            break;
+
+         default:
+            throw new IllegalArgumentException("Invalid scheduler type: " + schedulerType);
+      }
+   }
+
+   public void TurnOffDeviceAuto(String FEED_NAME) {
+      ScheduledFuture<?> oldTask = tasks.get(FEED_NAME);
+      if (oldTask != null && !oldTask.isCancelled()) {
+         oldTask.cancel(true);
+      }
+
+      System.out.println("Turn off " + FEED_NAME + "device automation");
+      // ScheduledFuture<?> newTask = taskScheduler.schedule(task, cronTrigger);
+      // tasks.put(FEED_NAME, newTask);
+   }
+
    public void publishMessage(String FEED_NAME, String message) {
       try {
          MqttMessage mqttMessage = new MqttMessage(message.getBytes());
@@ -180,7 +311,7 @@ public class MqttService {
       }
    }
 
-   public List<String> getAllTemperatureData(String FEED_NAME) {
+   public List<Double> getAllDataFeed(String FEED_NAME) {
       HttpHeaders headers = new HttpHeaders();
       headers.set("X-AIO-Key", AIO_KEY);
 
@@ -188,18 +319,87 @@ public class MqttService {
 
       String url = "https://io.adafruit.com/api/v2/" + USERNAME + "/feeds/" + FEED_NAME + "/data";
 
-      ResponseEntity<TemperatureMqtt[]> response = restTemplate.exchange(
+      ResponseEntity<FeedMqttResponse[]> response = restTemplate.exchange(
             url,
             HttpMethod.GET,
             entity,
-            TemperatureMqtt[].class);
+            FeedMqttResponse[].class);
 
       if (response.getBody() == null) {
          return List.of();
       }
 
       return Arrays.stream(response.getBody())
-            .map(TemperatureMqtt::getValue)
+            .map(FeedMqttResponse::getValue)
             .collect(Collectors.toList());
+   }
+
+   public RangeValueMqttResponse getRangeValue(String FEED_NAME) {
+      String id_block = "";
+
+      if (FEED_NAME.equals(FEED_MOISTURE)) {
+         id_block = "2731269";
+      } else if (FEED_NAME.equals(FEED_HUMIDITY)) {
+         id_block = "2761303";
+      } else if (FEED_NAME.equals(FEED_TEMPERATURE)) {
+         id_block = "2761302";
+      } else if (FEED_NAME.equals(FEED_LIGHT)) {
+         id_block = "2731268";
+      }
+
+      String url = "https://io.adafruit.com/api/v2/" + USERNAME + "/dashboards/" + DASHBOARD_KEY + "/blocks/"
+            + id_block;
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.set("X-AIO-Key", AIO_KEY);
+
+      HttpEntity<String> entity = new HttpEntity<>(headers);
+
+      ResponseEntity<RangeValueMqttResponse> response = restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            entity,
+            RangeValueMqttResponse.class);
+      return response.getBody();
+   }
+
+   public void UpdateRangeValue(String FEED_NAME, int minValue, int maxValue) {
+      String id_block = "";
+
+      if (FEED_NAME.equals(FEED_MOISTURE)) {
+         id_block = "2731269";
+      } else if (FEED_NAME.equals(FEED_HUMIDITY)) {
+         id_block = "2761303";
+      } else if (FEED_NAME.equals(FEED_TEMPERATURE)) {
+         id_block = "2761302";
+      } else if (FEED_NAME.equals(FEED_LIGHT)) {
+         id_block = "2731268";
+      }
+
+      String url = "https://io.adafruit.com/api/v2/" + USERNAME + "/dashboards/" + DASHBOARD_KEY + "/blocks/"
+            + id_block;
+
+      String body = String.format("""
+            {
+              "properties": {
+                "minValue": "%s",
+                "maxValue": "%s"
+              }
+            }
+            """, minValue, maxValue);
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_JSON);
+      headers.set("X-AIO-Key", AIO_KEY);
+
+      HttpEntity<String> entity = new HttpEntity<>(body, headers);
+      RestTemplate restTemplate = new RestTemplate();
+
+      try {
+         restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+         System.out.println("Block " + id_block + " updated successfully!");
+      } catch (HttpClientErrorException e) {
+         System.out.println("Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+      }
    }
 }

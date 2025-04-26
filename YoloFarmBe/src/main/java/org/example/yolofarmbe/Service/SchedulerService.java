@@ -28,6 +28,9 @@ public class SchedulerService {
     @Autowired
     private IrrigationScheduledRepository irrigationScheduledRepository;
 
+    @Autowired
+    private MqttService mqttservice;
+
     public List<? extends Scheduler> getAllScheduler(String schedulerType){
         switch (schedulerType.toLowerCase()){
             case "daily":
@@ -50,12 +53,14 @@ public class SchedulerService {
                 DailyTaskRepository dailyTaskRepository = schedulerFactory.getSchedulerRepository(DailyTaskRepository.class);
                 DailyTask dailyTask = new DailyTask();
                 if(schedulerRequest.getLightScheduled()!=null){
+                    mqttservice.TurnOnDeviceAuto("fan","daily",schedulerRequest);
                     int sid = schedulerRequest.getLightScheduled().getId();
                     LightScheduled lightScheduled = lightScheduledRepository.findById(sid)
                             .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+sid+" doesn't exist!"));
                     dailyTask.setLightScheduled(lightScheduled);
                 }
                 if(schedulerRequest.getTemperatureScheduled()!=null){
+                    mqttservice.TurnOnDeviceAuto("water","daily",schedulerRequest);
                     int tid = schedulerRequest.getTemperatureScheduled().getId();
                     TemperatureScheduled temperatureScheduled = temperatureScheduledRepository.findById(tid)
                             .orElseThrow(()->new ResourceNotFoundException("Temperature Setting with id "+tid+" doesn't exist!"));
@@ -83,13 +88,15 @@ public class SchedulerService {
             case "weekly":
                 WeeklyTaskRepository weeklyTaskRepository = schedulerFactory.getSchedulerRepository(WeeklyTaskRepository.class);
                 WeeklyTask weeklyTask = new WeeklyTask();
-                if(schedulerRequest.getLightScheduled()!=null){
+                if (schedulerRequest.getLightScheduled() != null) {
+                    mqttservice.TurnOnDeviceAuto("fan", "daily", schedulerRequest);
                     int sid = schedulerRequest.getLightScheduled().getId();
                     LightScheduled lightScheduled = lightScheduledRepository.findById(sid)
                             .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+sid+" doesn't exist!"));
                     weeklyTask.setLightScheduled(lightScheduled);
                 }
-                if(schedulerRequest.getTemperatureScheduled()!=null){
+                if (schedulerRequest.getTemperatureScheduled() != null) {
+                    mqttservice.TurnOnDeviceAuto("fan", "daily", schedulerRequest);
                     int tid = schedulerRequest.getTemperatureScheduled().getId();
                     TemperatureScheduled temperatureScheduled = temperatureScheduledRepository.findById(tid)
                             .orElseThrow(()->new ResourceNotFoundException("Temperature Setting with id "+tid+" doesn't exist!"));
@@ -120,13 +127,15 @@ public class SchedulerService {
             case "monthly":
                 MonthlyTaskRepository monthlyTaskRepository = schedulerFactory.getSchedulerRepository(MonthlyTaskRepository.class);
                 MonthlyTask monthlyTask = new MonthlyTask();
-                if(schedulerRequest.getLightScheduled()!=null){
+                if (schedulerRequest.getLightScheduled() != null) {
+                    mqttservice.TurnOnDeviceAuto("fan", "daily", schedulerRequest);
                     int sid = schedulerRequest.getLightScheduled().getId();
                     LightScheduled lightScheduled = lightScheduledRepository.findById(sid)
                             .orElseThrow(()->new ResourceNotFoundException("Light Setting with id "+sid+" doesn't exist!"));
                     monthlyTask.setLightScheduled(lightScheduled);
                 }
                 if(schedulerRequest.getTemperatureScheduled()!=null){
+                    mqttservice.TurnOnDeviceAuto("fan", "daily", schedulerRequest);
                     int tid = schedulerRequest.getTemperatureScheduled().getId();
                     TemperatureScheduled temperatureScheduled = temperatureScheduledRepository.findById(tid)
                             .orElseThrow(()->new ResourceNotFoundException("Temperature Setting with id "+tid+" doesn't exist!"));

@@ -1,8 +1,15 @@
 package org.example.yolofarmbe.Controller;
 
+import java.util.List;
+
+import org.example.yolofarmbe.Response.RangeValueMqttResponse;
 import org.example.yolofarmbe.Service.MqttService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/mqtt")
@@ -14,34 +21,48 @@ public class MqttController {
       this.mqttService = mqttService;
    }
 
-   @PostMapping("/temperature")
-   public String SendTemperature(@RequestParam String value) {
-      mqttService.publishMessage("temperature", value);
-      return "Message sent: " + value;
+   @GetMapping("/{feed}")
+   public List<Double> getAllDataMqtt(@PathVariable String feed) {
+      return mqttService.getAllDataFeed(feed);
    }
 
-   @PostMapping("/moisture")
-   public String SendMoisture(@RequestParam String value) {
-      mqttService.publishMessage("moisture", value);
-      return "Message sent: " + value;
+   @GetMapping("/{feed}/range")
+   public ResponseEntity<RangeValueMqttResponse> getRangeValue(@PathVariable String feed) {
+      RangeValueMqttResponse rangeValueMqtt = mqttService.getRangeValue(feed);
+      return ResponseEntity.ok(rangeValueMqtt);
    }
 
-   @PostMapping("/humidity")
-   public String SendHumidity(@RequestParam String value) {
-      mqttService.publishMessage("humidity", value);
-      return "Message sent: " + value;
+   @PostMapping("/{device}/{val}")
+   public ResponseEntity<String> fan(@PathVariable String val, @PathVariable String device) {
+      try {
+         mqttService.publishMessage(device, val);
+         return ResponseEntity.ok("Update fan device successfully");
+      } catch (Exception e) {
+         System.out.println("Error updating " + device + " device");
+         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating " + device + " device", e);
+      }
    }
 
-   @PostMapping("/a-toggle")
-   public String SendaToggle(@RequestParam String value) {
-      mqttService.publishMessage("a-toggle", value);
-      return "Message sent: " + value;
+   @PutMapping("/{feed}")
+   public ResponseEntity<String> UpdateRangeValue(@PathVariable String feed, @RequestParam int minValue,
+         @RequestParam int maxValue) {
+      try {
+         mqttService.UpdateRangeValue(feed, minValue, maxValue);
+         return ResponseEntity.ok("Updated range for feed: " + feed);
+      } catch (Exception e) {
+         System.out.println("Error updating range: " + e.getMessage());
+         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update range", e);
+      }
    }
 
-   @PostMapping("/m-toggle")
-   public String SendmToggle(@RequestParam String value) {
-      mqttService.publishMessage("m-toggle", value);
-      return "Message sent: " + value;
+   @GetMapping("{feed}/auto/on")
+   public void TurnOnAuto(@PathVariable String feed, @RequestParam long duration) {
+      mqttService.TurnOnDeviceAuto(feed, "daily", null, duration);
+   }
+
+   @GetMapping("{feed}/auto/off")
+   public void TurnOffAuto(@PathVariable String feed) {
+      mqttService.TurnOffDeviceAuto(feed);
    }
 
 }

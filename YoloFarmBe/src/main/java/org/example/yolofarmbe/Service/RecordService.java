@@ -79,7 +79,7 @@ public class RecordService {
 
     public void SaveRecords(String recordType, Record record) {
         switch (recordType.toLowerCase()) {
-            case "amountwater":
+            case "water":
                 AmountOfWaterRecordRepository amoWaterRepo = recordRepositoryFactory
                         .getRecordRepository(AmountOfWaterRecordRepository.class);
                 amoWaterRepo.save((AmountOfWaterRecord) record);

@@ -19,46 +19,46 @@ public class TemperatureSettingController {
     private TemperatureSettingService temperatureSettingService;
 
     @GetMapping("{mode}")
-    public List<? extends TemperatureSetting> getAllTemperatureSetting(@PathVariable String mode){
+    public List<? extends TemperatureSetting> getAllTemperatureSetting(@PathVariable String mode) {
         return temperatureSettingService.getAllTemperatureSetting(mode);
     }
 
     @GetMapping("{mode}/farm/{farm_id}")
-    public ResponseEntity<TemperatureSettingResponse> getTemperatureSettingByFarmId(@PathVariable String mode, @PathVariable int farm_id){
+    public ResponseEntity<TemperatureSettingResponse> getTemperatureSettingByFarmId(@PathVariable String mode,
+            @PathVariable int farm_id) {
         try {
-            return ResponseEntity.ok(temperatureSettingService.getTemperatureSettingByFarm(mode,farm_id));
-        }catch (ResourceNotFoundException e){
-            return ResponseEntity.badRequest().body(
-                    TemperatureSettingResponse.builder()
-                                .temperatureSetting(null)
-                                .message(e.getMessage())
-                                .mode(mode)
-                                .build()
-                );
-        }catch (IllegalArgumentException e){
-                return ResponseEntity.badRequest().body(
-                        TemperatureSettingResponse.builder()
-                                .temperatureSetting(null)
-                                .message(e.getMessage())
-                                .mode(mode)
-                                .build());
-
-        }
-    }
-
-    @GetMapping("{mode}/{id}")
-    public ResponseEntity<TemperatureSettingResponse> getTemperatureSettingById(@PathVariable String mode, @PathVariable int id){
-        try {
-            return ResponseEntity.ok(temperatureSettingService.getTemperatureSettingById(mode,id));
-        }catch (ResourceNotFoundException e){
+            return ResponseEntity.ok(temperatureSettingService.getTemperatureSettingByFarm(mode, farm_id));
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.badRequest().body(
                     TemperatureSettingResponse.builder()
                             .temperatureSetting(null)
                             .message(e.getMessage())
                             .mode(mode)
-                            .build()
-            );
-        }catch (IllegalArgumentException e){
+                            .build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    TemperatureSettingResponse.builder()
+                            .temperatureSetting(null)
+                            .message(e.getMessage())
+                            .mode(mode)
+                            .build());
+
+        }
+    }
+
+    @GetMapping("{mode}/{id}")
+    public ResponseEntity<TemperatureSettingResponse> getTemperatureSettingById(@PathVariable String mode,
+            @PathVariable int id) {
+        try {
+            return ResponseEntity.ok(temperatureSettingService.getTemperatureSettingById(mode, id));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.badRequest().body(
+                    TemperatureSettingResponse.builder()
+                            .temperatureSetting(null)
+                            .message(e.getMessage())
+                            .mode(mode)
+                            .build());
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
                     TemperatureSettingResponse.builder()
                             .temperatureSetting(null)
@@ -70,18 +70,18 @@ public class TemperatureSettingController {
     }
 
     @PostMapping("/{mode}")
-    public ResponseEntity<TemperatureSettingResponse> addTemperatureSetting(@RequestBody TemperatureSettingRequest temperatureSettingRequest, @PathVariable String mode){
+    public ResponseEntity<TemperatureSettingResponse> addTemperatureSetting(
+            @RequestBody TemperatureSettingRequest temperatureSettingRequest, @PathVariable String mode) {
         try {
-            return ResponseEntity.ok(temperatureSettingService.addTemperatureSetting(mode,temperatureSettingRequest));
-        }catch (ResourceNotFoundException e){
+            return ResponseEntity.ok(temperatureSettingService.addTemperatureSetting(mode, temperatureSettingRequest));
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.badRequest().body(
                     TemperatureSettingResponse.builder()
                             .temperatureSetting(null)
                             .message(e.getMessage())
                             .mode(mode)
-                            .build()
-            );
-        }catch (IllegalArgumentException e){
+                            .build());
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
                     TemperatureSettingResponse.builder()
                             .temperatureSetting(null)
@@ -93,17 +93,19 @@ public class TemperatureSettingController {
     }
 
     @PutMapping("/{mode}/{id}")
-    public ResponseEntity<TemperatureSettingResponse> updateTemperatureSetting(@RequestBody TemperatureSettingRequest temperatureSettingRequest, @PathVariable String mode, @PathVariable int id) {
+    public ResponseEntity<TemperatureSettingResponse> updateTemperatureSetting(
+            @RequestBody TemperatureSettingRequest temperatureSettingRequest, @PathVariable String mode,
+            @PathVariable int id) {
         try {
-            return ResponseEntity.ok(temperatureSettingService.updateTemperatureSetting(mode, id, temperatureSettingRequest));
+            return ResponseEntity
+                    .ok(temperatureSettingService.updateTemperatureSetting(mode, id, temperatureSettingRequest));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.badRequest().body(
                     TemperatureSettingResponse.builder()
                             .temperatureSetting(null)
                             .message(e.getMessage())
                             .mode(mode)
-                            .build()
-            );
+                            .build());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
                     TemperatureSettingResponse.builder()
@@ -116,17 +118,17 @@ public class TemperatureSettingController {
     }
 
     @DeleteMapping("/{mode}/{id}")
-    public ResponseEntity<TemperatureSettingResponse> deleteTemperatureSetting(@PathVariable String mode, @PathVariable int id){
+    public ResponseEntity<TemperatureSettingResponse> deleteTemperatureSetting(@PathVariable String mode,
+            @PathVariable int id) {
         try {
             return ResponseEntity.ok(temperatureSettingService.deleteTemperatureSetting(mode, id));
-        }catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.badRequest().body(
                     TemperatureSettingResponse.builder()
                             .temperatureSetting(null)
                             .message(e.getMessage())
                             .mode(mode)
-                            .build()
-            );
+                            .build());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
                     TemperatureSettingResponse.builder()

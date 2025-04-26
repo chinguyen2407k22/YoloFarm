@@ -226,9 +226,9 @@ public class MqttService {
    }
 
    // @Async
-   public void TurnOnDeviceAuto(String FEED_NAME, String schedulerType, SchedulerRequest schedulerRequest,
-         long duration) {
-      // long duration = schedulerRequest.getDuration();
+   public void TurnOnDeviceAuto(String FEED_NAME, String schedulerType, SchedulerRequest schedulerRequest) {
+      System.out.
+      long duration = schedulerRequest.getDuration();
       // long duration = 5000;
       switch (schedulerType.toLowerCase()) {
          case "daily":

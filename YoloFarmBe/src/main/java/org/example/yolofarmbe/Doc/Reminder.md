@@ -64,7 +64,6 @@ method: POST
 body:
 {
     id: {
-        id: int,
         username: String
     }
     title: String

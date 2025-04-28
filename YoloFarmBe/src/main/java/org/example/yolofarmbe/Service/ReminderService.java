@@ -60,6 +60,12 @@ public class ReminderService {
         String username = reminder.getId().getUsername();
         UserAccount userAccount = userAccountRepository.findByUsername(username)
                         .orElseThrow(()->new UserNotFoundException());
+        Integer maxId = reminderRepository.findMaxIdByUsername(username);
+        int nextId = (maxId == null) ? 1 : maxId + 1;
+        ReminderId reminderId = new ReminderId();
+        reminderId.setId(nextId);
+        reminderId.setUsername(username);
+        reminder.setId(reminderId);
         reminder.setUserAccount(userAccount);
         reminderRepository.save(reminder);
         ReminderView reminderView = reminderRepository.findReminderById(reminder.getId())
@@ -105,4 +111,5 @@ public class ReminderService {
                 .reminder(reminderView)
                 .build();
     }
+
 }

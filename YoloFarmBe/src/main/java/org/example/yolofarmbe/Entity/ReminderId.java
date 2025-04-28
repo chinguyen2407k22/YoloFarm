@@ -2,6 +2,7 @@ package org.example.yolofarmbe.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.GeneratedValue;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Nationalized;
 

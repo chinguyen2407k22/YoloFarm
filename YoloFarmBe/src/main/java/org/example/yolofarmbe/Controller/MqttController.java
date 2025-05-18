@@ -57,12 +57,12 @@ public class MqttController {
 
    @GetMapping("{feed}/auto/on")
    public void TurnOnAuto(@PathVariable String feed, @RequestParam long duration) {
-      mqttService.TurnOnDeviceAuto(feed, "daily", null, duration);
+      // mqttService.TurnOnDeviceAuto(feed, "daily", null, duration);
    }
 
-   @GetMapping("{feed}/auto/off")
-   public void TurnOffAuto(@PathVariable String feed) {
-      mqttService.TurnOffDeviceAuto(feed);
-   }
+   // @GetMapping("{feed}/auto/off")
+   // public void TurnOffAuto(@PathVariable String feed) {
+   //    mqttService.TurnOffDeviceAuto(feed);
+   // }
 
 }

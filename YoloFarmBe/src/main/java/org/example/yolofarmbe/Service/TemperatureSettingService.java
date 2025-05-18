@@ -20,6 +20,9 @@ public class TemperatureSettingService {
         @Autowired
         private FarmRepository farmRepository;
 
+        @Autowired
+        private MqttService mqttService;
+
         public List<? extends TemperatureSetting> getAllTemperatureSetting(String mode) {
                 switch (mode.toLowerCase()) {
                         case "automated":
@@ -149,6 +152,8 @@ public class TemperatureSettingService {
                                 if (request.getLower() > 0) {
                                         temperatureAutomated.setLower(request.getLower());
                                 }
+                                mqttService.TurnOnDeviceWaterAuto(
+                                                temperatureAutomated.getLower(), temperatureAutomated.getUpper());
                                 temperatureAutomatedRepository.save(temperatureAutomated);
                                 return TemperatureSettingResponse.builder()
                                                 .temperatureSetting(temperatureAutomated)
@@ -170,6 +175,12 @@ public class TemperatureSettingService {
                                 }
                                 if (request.getSunShade() != null) {
                                         temperatureManual.setSunShade(request.getSunShade());
+                                        State state = request.getSunShade();
+                                        if (state == State.ON) {
+                                                mqttService.TurnOnDeviceManual("water", "1");
+                                        } else {
+                                                mqttService.TurnOnDeviceManual("water", "0");
+                                        }
                                 }
                                 temperatureManualRepository.save(temperatureManual);
                                 return TemperatureSettingResponse.builder()
@@ -233,6 +244,8 @@ public class TemperatureSettingService {
                                 if (request.getLower() > 0) {
                                         temperatureAutomated.setLower(request.getLower());
                                 }
+                                mqttService.TurnOnDeviceWaterAuto(
+                                                temperatureAutomated.getLower(), temperatureAutomated.getUpper());
                                 temperatureAutomatedRepository.save(temperatureAutomated);
                                 return TemperatureSettingResponse.builder()
                                                 .temperatureSetting(temperatureAutomated)
@@ -254,6 +267,12 @@ public class TemperatureSettingService {
                                 }
                                 if (request.getSunShade() != null) {
                                         temperatureManual.setSunShade(request.getSunShade());
+                                        State state = request.getSunShade();
+                                        if (state == State.ON) {
+                                                mqttService.TurnOnDeviceManual("water", "1");
+                                        } else {
+                                                mqttService.TurnOnDeviceManual("water", "0");
+                                        }
                                 }
                                 temperatureManualRepository.save(temperatureManual);
                                 return TemperatureSettingResponse.builder()

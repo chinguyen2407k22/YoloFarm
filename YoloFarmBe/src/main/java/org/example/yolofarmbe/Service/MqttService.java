@@ -63,7 +63,7 @@ public class MqttService {
 
    private final String BROKER_URL = "tcp://io.adafruit.com:1883";
    private final String USERNAME = "fungchill";
-   private final String AIO_KEY = "aio_JsLe68kgpNwERpK2rfN6KfuePNbc";
+   private final String AIO_KEY = System.getenv("ADAFRUIT_IO_KEY");
    private final String DASHBOARD_KEY = "yolo-farm";
    private final String FEED_TEMPERATURE = "temperature";
    private final String FEED_MOISTURE = "moisture";

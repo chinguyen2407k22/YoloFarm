@@ -35,8 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +63,7 @@ public class MqttService {
 
    private final String BROKER_URL = "tcp://io.adafruit.com:1883";
    private final String USERNAME = "fungchill";
-   private final String AIO_KEY = "aio_qhOp85Q5RZjfaYcpSMyizOk0gTDp";
+   private final String AIO_KEY = System.getenv("ADAFRUIT_IO_KEY");
    private final String DASHBOARD_KEY = "yolo-farm";
    private final String FEED_TEMPERATURE = "temperature";
    private final String FEED_MOISTURE = "moisture";
@@ -69,8 +71,12 @@ public class MqttService {
    private final String FEED_LIGHT = "light";
    private final String FEED_WATER = "water";
    private final String FEED_FAN = "fan";
+   private volatile boolean waterRun = true;
+   private volatile boolean fanRun = true;
 
    private MqttClient client;
+
+   private MqttConnectOptions options;
 
    @Autowired
    private RecordService recordService;
@@ -89,10 +95,13 @@ public class MqttService {
    public MqttService() {
       try {
          client = new MqttClient(BROKER_URL, MqttClient.generateClientId());
-         MqttConnectOptions options = new MqttConnectOptions();
+         options = new MqttConnectOptions();
          options.setUserName(USERNAME);
          options.setPassword(AIO_KEY.toCharArray());
+         options.setAutomaticReconnect(true);
          client.connect(options);
+         while (!client.isConnected())
+            client.connect(options);
          client.subscribe(USERNAME + "/feeds/+");
 
       } catch (MqttException e) {
@@ -100,7 +109,7 @@ public class MqttService {
       }
    }
 
-   @Scheduled(fixedRate = 10 * 1000)
+   @Scheduled(fixedRate = 20 * 1000)
    public void fetchDataFromAdafruit() {
       try {
          HttpHeaders headers = new HttpHeaders();
@@ -132,7 +141,7 @@ public class MqttService {
             // amountofwaterRecord.setFarm(farm);
             // // recordService.SaveRecords(feed, amountofwaterRecord);
 
-            // System.out.println("Fetched data from " + feed + ": " +
+            // System.out.println("Fetched data from " + fee d + ": " +
             // response.getBody().get(0).getValue());
             // } else
             {
@@ -179,24 +188,29 @@ public class MqttService {
          }
          System.out.println("\n----------------------------------------------------------------------");
 
-         // Random random = new Random();
-         // int btn = random.nextInt(4);
-         // if (btn % 2 == 0) {
-         // publishMessage(FEED_FAN, "0");
-         // publishMessage(FEED_WATER, "0");
-         // } else {
-         // publishMessage(FEED_FAN, "1");
-         // publishMessage(FEED_WATER, "1");
-         // }
-         // publishMessage(FEED_TEMPERATURE, String.valueOf(random.nextInt(60)));
-         // publishMessage(FEED_MOISTURE, String.valueOf(random.nextInt(100)));
-         // publishMessage(FEED_HUMIDITY, String.valueOf(random.nextInt(60)));
-         // publishMessage(FEED_LIGHT, String.valueOf(random.nextInt(5000)));
+         Random random = new Random();
+         publishMessage(FEED_TEMPERATURE, String.valueOf(random.nextInt(60)));
+         publishMessage(FEED_MOISTURE, String.valueOf(random.nextInt(100)));
+         publishMessage(FEED_HUMIDITY, String.valueOf(random.nextInt(60)));
+         publishMessage(FEED_LIGHT, String.valueOf(random.nextInt(700, 750)));
 
       } catch (Exception e) {
          e.printStackTrace();
       }
    }
+
+   public void publishMessage(String FEED_NAME, String message) {
+      try {
+         MqttMessage mqttMessage = new MqttMessage(message.getBytes());
+         mqttMessage.setQos(1);
+         client.publish(USERNAME + "/feeds/" + FEED_NAME, mqttMessage);
+         System.out.println("Published to Feed:" + FEED_NAME + " - message:" + message);
+      } catch (MqttException e) {
+         e.printStackTrace();
+      }
+   }
+
+   // ------------------------------------------------------------------------------------
 
    @Async
    public void TaskRepeat(String FEED_NAME, long duration, String cronExpression) {
@@ -226,8 +240,7 @@ public class MqttService {
    }
 
    // @Async
-   public void TurnOnDeviceAuto(String FEED_NAME, String schedulerType, SchedulerRequest schedulerRequest) {
-      System.out.
+   public void TurnOnDeviceSchedule(String FEED_NAME, String schedulerType, SchedulerRequest schedulerRequest) {
       long duration = schedulerRequest.getDuration();
       // long duration = 5000;
       switch (schedulerType.toLowerCase()) {
@@ -289,7 +302,7 @@ public class MqttService {
       }
    }
 
-   public void TurnOffDeviceAuto(String FEED_NAME) {
+   public void TurnOffDeviceSchedule(String FEED_NAME) {
       ScheduledFuture<?> oldTask = tasks.get(FEED_NAME);
       if (oldTask != null && !oldTask.isCancelled()) {
          oldTask.cancel(true);
@@ -300,17 +313,147 @@ public class MqttService {
       // tasks.put(FEED_NAME, newTask);
    }
 
-   public void publishMessage(String FEED_NAME, String message) {
+   // -----------------Manual----------------------------
+   public void TurnOnDeviceManual(String FEED_NAME, String state) {
+      publishMessage(FEED_NAME, state);
+   }
+
+   // -----------------Automated--------------------------
+   // @Async
+   public void RunDeviceWaterAuto(int LOWER, int UPPER) {
+      String FEED_NAME = "water";
+      HttpHeaders headers = new HttpHeaders();
+      headers.set("X-AIO-Key", AIO_KEY);
+
+      HttpEntity<String> entity = new HttpEntity<>(headers);
+      String URL = "https://io.adafruit.com/api/v2/" + USERNAME + "/feeds/" + FEED_NAME
+            + "/data/last";
+      ResponseEntity<AdafruitResponse> response = restTemplate.exchange(URL,
+            HttpMethod.GET, entity,
+            AdafruitResponse.class);
       try {
-         MqttMessage mqttMessage = new MqttMessage(message.getBytes());
-         mqttMessage.setQos(1);
-         client.publish(USERNAME + "/feeds/" + FEED_NAME, mqttMessage);
-         System.out.println("Published to Feed:" + FEED_NAME + " - message:" + message);
+         if (!client.isConnected()) {
+            while (!client.isConnected())
+               client.connect(options);
+            client.subscribe(USERNAME + "/feeds/+");
+         }
       } catch (MqttException e) {
          e.printStackTrace();
       }
+      int val = Integer.parseInt(response.getBody().getValue());
+      System.out.println(LOWER + " ----" + UPPER + "-----" + val);
+      if (val < LOWER) {
+         publishMessage(FEED_NAME, "1");
+         try {
+            Thread.sleep(30000);
+         } catch (Exception e) {
+            System.out.println(e);
+         }
+         publishMessage(FEED_NAME, "0");
+      } else if (val > UPPER) {
+         publishMessage(FEED_NAME, "1");
+         try {
+            Thread.sleep(10000);
+         } catch (Exception e) {
+            System.out.println(e);
+         }
+         publishMessage(FEED_NAME, "0");
+      } else {
+         publishMessage(FEED_NAME, "0");
+      }
+
    }
 
+   public void TurnOnDeviceWaterAuto(int LOWER, int UPPER) {
+      try {
+         Thread.sleep(5000);
+      } catch (Exception e) {
+         System.out.println(e);
+      }
+      waterRun = true;
+      while (waterRun) {
+         RunDeviceWaterAuto(LOWER, UPPER);
+         try {
+            Thread.sleep(10000);
+         } catch (Exception e) {
+            System.out.println(e);
+         }
+      }
+   }
+
+   public void TurnOffDeviceWaterAuto() {
+      waterRun = false;
+      publishMessage(FEED_WATER, "0");
+   }
+
+   // @Async
+   public void RunDeviceFanAuto(int LOWER, int UPPER) {
+      HttpHeaders headers = new HttpHeaders();
+      headers.set("X-AIO-Key", AIO_KEY);
+
+      HttpEntity<String> entity = new HttpEntity<>(headers);
+      String URL = "https://io.adafruit.com/api/v2/" + USERNAME + "/feeds/" + FEED_LIGHT
+            + "/data/last";
+      ResponseEntity<AdafruitResponse> response = restTemplate.exchange(URL,
+            HttpMethod.GET, entity,
+            AdafruitResponse.class);
+      int val = Integer.parseInt(response.getBody().getValue());
+      System.out.println(LOWER + " ----" + UPPER + "-----" + val);
+      String FEED_NAME = "fan";
+      try {
+         if (!client.isConnected()) {
+            while (!client.isConnected())
+               client.connect(options);
+            client.subscribe(USERNAME + "/feeds/+");
+         }
+      } catch (MqttException e) {
+         e.printStackTrace();
+      }
+      if (val < LOWER) {
+         publishMessage(FEED_NAME, "1");
+         try {
+            Thread.sleep(30000);
+         } catch (Exception e) {
+            System.out.println(e);
+         }
+         publishMessage(FEED_NAME, "0");
+      } else if (val > UPPER) {
+         publishMessage(FEED_NAME, "1");
+         try {
+            Thread.sleep(10000);
+         } catch (Exception e) {
+            System.out.println(e);
+         }
+         publishMessage(FEED_NAME, "0");
+      } else {
+         publishMessage(FEED_NAME, "0");
+      }
+   }
+
+   public void TurnOnDeviceFanAuto(int LOWER, int UPPER) {
+      try {
+         Thread.sleep(5000);
+      } catch (Exception e) {
+         System.out.println(e);
+      }
+      fanRun = true;
+      while (fanRun) {
+         RunDeviceFanAuto(LOWER, UPPER);
+         try {
+            Thread.sleep(10000);
+         } catch (Exception e) {
+            System.out.println(e);
+         }
+      }
+   }
+
+   public void TurnOffDeviceFanAuto() {
+      fanRun = false;
+      publishMessage(FEED_FAN, "0");
+   }
+   // ------------------------------------------------------
+
+   // ---------------------------------------------------------------------------------------
    public List<Double> getAllDataFeed(String FEED_NAME) {
       HttpHeaders headers = new HttpHeaders();
       headers.set("X-AIO-Key", AIO_KEY);

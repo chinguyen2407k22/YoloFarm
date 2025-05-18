@@ -26,6 +26,9 @@ public class LightSettingService {
         @Autowired
         private SchedulerService schedulerService;
 
+        @Autowired
+        private MqttService mqttService;
+
         public List<? extends LightSetting> getAllLightSetting(String mode) {
                 switch (mode.toLowerCase()) {
                         case "automated":
@@ -152,6 +155,9 @@ public class LightSettingService {
                                 if (lightSettingRequest.getSendWarning() != null) {
                                         lightAutomated.setSendWarning(lightSettingRequest.getSendWarning());
                                 }
+                                mqttService.TurnOffDeviceFanAuto();
+                                mqttService.TurnOnDeviceFanAuto(
+                                                lightSettingRequest.getLower(), lightSettingRequest.getUpper());
                                 lightAutomatedRepository.save(lightAutomated);
                                 return LightSettingResponse.builder()
                                                 .mode(mode)
@@ -172,6 +178,12 @@ public class LightSettingService {
                                 }
                                 if (lightSettingRequest.getTurnOn() != null) {
                                         lightManual.setTurnOn(lightSettingRequest.getTurnOn());
+                                        State state = lightSettingRequest.getTurnOn();
+                                        if (state == State.ON) {
+                                                mqttService.TurnOnDeviceManual("fan", "1");
+                                        } else {
+                                                mqttService.TurnOnDeviceManual("fan", "0");
+                                        }
                                 }
                                 lightManualRepository.save(lightManual);
                                 return LightSettingResponse.builder()
@@ -237,6 +249,9 @@ public class LightSettingService {
                                 if (lightSettingRequest.getSendWarning() != null) {
                                         lightAutomated.setSendWarning(lightSettingRequest.getSendWarning());
                                 }
+                                mqttService.TurnOffDeviceFanAuto();
+                                mqttService.TurnOnDeviceFanAuto(lightSettingRequest.getLower(),
+                                                lightSettingRequest.getUpper());
                                 lightAutomatedRepository.save(lightAutomated);
                                 return LightSettingResponse.builder()
                                                 .mode(mode)
@@ -259,6 +274,12 @@ public class LightSettingService {
                                 }
                                 if (lightSettingRequest.getTurnOn() != null) {
                                         lightManual.setTurnOn(lightManual.getTurnOn());
+                                        State state = lightSettingRequest.getTurnOn();
+                                        if (state == State.ON) {
+                                                mqttService.TurnOnDeviceManual("fan", "1");
+                                        } else {
+                                                mqttService.TurnOnDeviceManual("fan", "0");
+                                        }
                                 }
                                 lightManualRepository.save(lightManual);
                                 return LightSettingResponse.builder()
